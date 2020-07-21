@@ -1,0 +1,4 @@
+Type=Application
+Name=Cacao Accounting
+GenericName=Accounting App
+Exec=cacao-accounting-desktop
