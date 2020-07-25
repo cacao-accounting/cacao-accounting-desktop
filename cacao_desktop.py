@@ -24,7 +24,7 @@ Based on pyqt5webengine as cliente and waitress as WSGI server.
 """
 
 import subprocess
-from sys import argv
+from sys import argv, executable
 from PyQt5.QtWidgets import QApplication
 from cacao_accounting import create_app
 from cacao_accounting.conf import configuracion
@@ -47,7 +47,5 @@ def browser():
 
 
 if __name__ == "__main__":
-    subprocess.Popen(
-        browser()
-        )
-    server()
+    subprocess.Popen([executable, "-c", "import cacao_desktop; cacao_desktop.server()"])
+    browser()
