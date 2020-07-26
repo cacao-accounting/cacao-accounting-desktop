@@ -17,7 +17,7 @@
 #  Contributors:
 #   - William Moreno Reyes
 
-from setuptools import setup
+from setuptools import find_packages, setup
 from os import path
 
 here = path.abspath(path.dirname(__file__))
@@ -32,7 +32,7 @@ setup(
     description="Cacao Accounting as a dektop app",
     long_description=description,
     long_description_content_type='text/markdown',
-    packages=["cacao-accounting-desktop"],
+    packages=find_packages(),
     include_package_data=True,
     classifiers=[
         "Development Status :: 1 - Planning"
