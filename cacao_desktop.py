@@ -46,6 +46,10 @@ def browser():
     browser.exec_()
 
 
-if __name__ == "__main__":
+def run():
     subprocess.Popen([executable, "-c", "import cacao_desktop; cacao_desktop.server()"])
     browser()
+
+
+if __name__ == "__main__":
+    run()
