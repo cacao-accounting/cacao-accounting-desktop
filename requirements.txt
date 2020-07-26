@@ -1,2 +1,18 @@
+# Open Marquesote
+PyQtWebEngine
+waitress
+
+# Cacao Accounting
+alembic
+appdirs
+bcrypt
+configobj
+flask
+flask-login
+flask-sqlalchemy
+flask-wtf
+sqlalchemy
+wtforms
+
 git+https://github.com/cacao-accounting/open-marquesote.git
 git+https://github.com/cacao-accounting/cacao-accounting.git
