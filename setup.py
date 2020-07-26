@@ -26,7 +26,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="cacao-accounting-desktop",
-    version="0.0.1"
+    version="0.0.1",
     author="William José Moreno Reyes",
     author_email="williamjmorenor@gmail.com",
     description="Cacao Accounting as a dektop app",
