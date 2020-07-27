@@ -1,3 +1,4 @@
+cx-Freeze
 flake8
 pep517
 pytest
