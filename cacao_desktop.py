@@ -44,15 +44,19 @@ def server():
 
 
 def browser():
+    time.sleep(5)  # Give 5 seconds to the WSGI server to start.
     browser = QApplication(argv)
     window = MainWindow(url="http://127.0.0.1:8080/app", appname="Cacao Accounting Desktop")
     browser.exec_()
 
 
 def run():
-    subprocess.Popen([executable, "-c", "import cacao_desktop; cacao_desktop.server()"])
-    time.sleep(5)  # Give 5 seconds to the WSGI server to start.
-    browser()
+    subprocess.Popen(
+        [executable, "-c", "import cacao_desktop; cacao_desktop.server()"],
+        stderr=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+    )
+    subprocess.Popen([executable, "-c", "import cacao_desktop; cacao_desktop.browser()"])
 
 
 if __name__ == "__main__":
