@@ -24,6 +24,7 @@ Based on pyqt5webengine as cliente and waitress as WSGI server.
 """
 
 import subprocess
+import time
 from sys import argv, executable
 from PyQt5.QtWidgets import QApplication
 from cacao_accounting import create_app
@@ -34,20 +35,23 @@ from waitress import serve
 
 def server():
     app = create_app(configuracion)
-    serve(app)
+    try:
+        serve(app, threads=2)
+    except OSError:
+        # If the server was started before and is still running there will be a OSError: [Errno 98] Address already in use
+        # Since the server is already up and running we pass this error.
+        pass
 
 
 def browser():
     browser = QApplication(argv)
-    window = MainWindow(
-        url="http://127.0.0.1:8080/app",
-        appname="Cacao Accounting Desktop"
-        )
+    window = MainWindow(url="http://127.0.0.1:8080/app", appname="Cacao Accounting Desktop")
     browser.exec_()
 
 
 def run():
     subprocess.Popen([executable, "-c", "import cacao_desktop; cacao_desktop.server()"])
+    time.sleep(5)  # Give 5 seconds to the WSGI server to start.
     browser()
 
 
