@@ -19,14 +19,17 @@
 
 from setuptools import find_packages, setup
 from os import path
+from datetime import datetime
 
 here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     description = f.read()
 
+timestamp = ".dev" + datetime.today().strftime("%Y%m%d%H%M")
+
 setup(
     name="cacao-accounting-desktop",
-    version="0.0.1",
+    version="0.0.1" + timestamp,
     author="William José Moreno Reyes",
     author_email="williamjmorenor@gmail.com",
     description="Cacao Accounting as a dektop app",
