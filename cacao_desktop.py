@@ -29,12 +29,18 @@ from sys import argv, executable
 from PyQt5.QtWidgets import QApplication
 from cacao_accounting import create_app
 from cacao_accounting.conf import configuracion
+from cacao_accounting.metadata import DEVELOPMENT
 from open_marquesote import MainWindow
 from waitress import serve
 
 
 def server():
     app = create_app(configuracion)
+    if DEVELOPMENT:
+        app.config["ENV"] = "development"
+        app.config["DEBUG"] = True
+        app.config[" TEMPLATES_AUTO_RELOAD¶"] = True
+        app.config[" EXPLAIN_TEMPLATE_LOADING¶"] = True
     try:
         serve(app, threads=2)
     except OSError:
