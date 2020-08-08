@@ -58,11 +58,11 @@ def browser():
 
 def run():
     subprocess.Popen(
-        [executable, "-c", "import cacao_desktop; cacao_desktop.server()"],
+        [executable, "-c", "import cacao_accounting_desktop; cacao_accounting_desktop.server()"],
         stderr=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
     )
-    subprocess.Popen([executable, "-c", "import cacao_desktop; cacao_desktop.browser()"])
+    subprocess.Popen([executable, "-c", "import cacao_accounting_desktop; cacao_accounting_desktop.browser()"])
 
 
 if __name__ == "__main__":

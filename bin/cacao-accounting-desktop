@@ -19,7 +19,7 @@
 #  Contributors:
 #   - William Moreno Reyes
 
-from cacao_desktop import run
+from cacao_accounting_desktop import run
 
 if __name__ == "__main__":
     run()

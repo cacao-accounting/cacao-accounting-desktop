@@ -21,7 +21,7 @@ from setuptools import find_packages, setup
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, "README.md"), encoding="utf-8") as f:
     description = f.read()
 
 setup(
@@ -31,17 +31,10 @@ setup(
     author_email="williamjmorenor@gmail.com",
     description="Cacao Accounting as a dektop app",
     long_description=description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     packages=find_packages(),
     include_package_data=True,
-    classifiers=[
-        "Development Status :: 1 - Planning"
-    ],
-    install_requires=[
-        "cacao-accounting",
-        "open-marquesote"
-    ],
-    entry_points={
-        "console_scripts": ["cacao-desktop=cacao_desktop:run"]
-    }
+    classifiers=["Development Status :: 1 - Planning"],
+    install_requires=["cacao-accounting", "open-marquesote"],
+    entry_points={"console_scripts": ["cacao-desktop=cacao_accounting_desktop:run",]},
 )
