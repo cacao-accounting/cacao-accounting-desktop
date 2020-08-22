@@ -39,5 +39,11 @@ setup(
     include_package_data=True,
     classifiers=["Development Status :: 1 - Planning"],
     install_requires=["cacao-accounting", "open-marquesote"],
-    entry_points={"console_scripts": ["cacao-desktop=cacao_accounting_desktop:run",]},
+    entry_points={
+        "console_scripts": [
+            "cacao-accounting=cacao_accounting_desktop:run",
+            "cacao-desktop=cacao_accounting_desktop:run",
+            "cacao-accounting-desktop=cacao_accounting_desktop:run",
+        ]
+    },
 )
