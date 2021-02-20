@@ -1,0 +1,45 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+- master
+
+pool:
+  vmImage: windows-latest
+strategy:
+  matrix:
+    Python39:
+      python.version: '3.9'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install git+https://github.com/cacao-accounting/cacao-accounting.git
+    pip install git+https://github.com/cacao-accounting/open-marquesote.git
+    pip install pyinstaller
+    pyinstaller --noconfirm --log-level=WARN --windowed cacaodesktop.pyw
+  displayName: 'Crear ejecutable'
+
+- task: CopyFiles@2
+  inputs: 
+    SourceFolder: '$(Build.SourcesDirectory)/dist'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishPipelineArtifact@0
+  displayName: 'Publish pipeline artifact'
+  inputs:
+    artifactName: 'Cacao Accounting'
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+
+- task: DownloadBuildArtifacts@0
+  inputs:
+    artifactName: 'Cacao Accounting'
+    downloadPath: '$(System.ArtifactsDirectory)' 
+  displayName: 'Decargar ejecutable'
