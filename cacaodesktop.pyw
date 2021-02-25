@@ -17,6 +17,6 @@
 #  Contributors:
 #   - William Moreno Reyes
 
-from cacao_accounting_desktop import run
+from cacao_accounting_desktop import server
 
-run()
+server()
