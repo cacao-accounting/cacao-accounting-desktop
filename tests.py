@@ -20,5 +20,5 @@
 def test_importable():
     import cacao_accounting
     import open_marquesote
-    from cacao_desktop import server, browser
+    from cacao_accounting_desktop import server, browser
     pass
