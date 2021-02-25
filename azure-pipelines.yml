@@ -37,9 +37,3 @@ steps:
   inputs:
     artifactName: 'Cacao Accounting'
     targetPath: '$(Build.ArtifactStagingDirectory)'
-
-- task: DownloadBuildArtifacts@0
-  inputs:
-    artifactName: 'Cacao Accounting'
-    downloadPath: '$(System.ArtifactsDirectory)' 
-  displayName: 'Decargar ejecutable'
