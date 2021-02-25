@@ -28,7 +28,7 @@ import time
 from sys import argv, executable
 from PyQt5.QtWidgets import QApplication
 from cacao_accounting import create_app
-from cacao_accounting.conf import configuracion
+from cacao_accounting.config import configuracion
 from cacao_accounting.metadata import DEVELOPMENT
 from open_marquesote import MainWindow
 from waitress import serve
@@ -42,7 +42,7 @@ def server():
         app.config[" TEMPLATES_AUTO_RELOAD¶"] = True
         app.config[" EXPLAIN_TEMPLATE_LOADING¶"] = True
     try:
-        serve(app, threads=2)
+        serve(app, threads=2, port=9764)
     except OSError:
         # If the server was started before and is still running there will be a OSError: [Errno 98] Address already in use
         # Since the server is already up and running we pass this error.
@@ -52,7 +52,7 @@ def server():
 def browser():
     time.sleep(5)  # Give 5 seconds to the WSGI server to start.
     browser = QApplication(argv)
-    window = MainWindow(url="http://127.0.0.1:8080/app", appname="Cacao Accounting Desktop")
+    window = MainWindow(url="http://127.0.0.1:9764/app", appname="Cacao Accounting Desktop")
     browser.exec_()
 
 

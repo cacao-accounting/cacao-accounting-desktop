@@ -17,8 +17,7 @@
 #  Contributors:
 #   - William Moreno Reyes
 
-def test_importable():
-    import cacao_accounting
-    import open_marquesote
-    from cacao_accounting_desktop import server, browser
-    pass
+from cacao_accounting_desktop import run
+
+if __name__ == "__main__":
+    run()
