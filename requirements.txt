@@ -1,0 +1,6 @@
+appdirs
+cacao-accounting
+customtkinter
+CTkMessagebox
+flaskwebgui
+pillow
