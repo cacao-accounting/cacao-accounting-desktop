@@ -38,6 +38,9 @@ if TYPE_CHECKING:
     from flask import Flask
 
 
+# ---------------------------------------------------------------------------------------
+# Principales constantes
+# ---------------------------------------------------------------------------------------
 APP_DIRS: AppDirs = AppDirs("Cacao Accounting Desktop", "BMO Soluciones")
 APP_CONFIG_DIR = Path(os.path.join(APP_DIRS.user_config_dir))
 APP_DATA_DIR = Path(os.path.join(APP_DIRS.user_data_dir))
@@ -46,18 +49,24 @@ APP_BACKUP_DIR = Path(os.path.join(APP_HOME_DIR, "Backups"))
 SECURE_KEY_FILE = Path(os.path.join(APP_CONFIG_DIR, "secret.key"))
 BACKUP_PATH_FILE = Path(os.path.join(APP_CONFIG_DIR, "backup.path"))
 
-# Ensure app directories exists
+
+# ---------------------------------------------------------------------------------------
+# Asegura que los directorios utilizados por la aplicación existen
+# ---------------------------------------------------------------------------------------
 APP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
 APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 FILE_LIST = os.listdir(APP_DATA_DIR)
 
-DB_FILES = []
-for file in FILE_LIST:
-    if file.endswith(".db"):
-        DB_FILES.append(file)
-        if len(DB_FILES) == 0:
-            DB_FILES.append("No se encontraron bases de datos.")
+
+def get_database_file_list():
+    DB_FILES = []
+    for file in FILE_LIST:
+        if file.endswith(".db"):
+            DB_FILES.append(file)
+    if len(DB_FILES) == 0:
+        DB_FILES.append("No se encontraron bases de datos.")
+    return DB_FILES
 
 
 def get_secret_key():
@@ -86,29 +95,6 @@ def get_backup_path():
             return Path(f.readline())
     else:
         return APP_BACKUP_DIR
-
-
-def init_db(file, app, user, passwd):
-    """
-    Database initializacion script.
-
-    If DATABASE_FILE not exist will create a new databa file and pupulate it with
-    the inicial data.
-
-    """
-    from cacao_accounting.database.helpers import inicia_base_de_datos
-
-    if Path.exists(file):
-        TIME_STAMP = datetime.today().strftime("%Y.%m.%d")
-        BACKUP_FILE = Path(
-            os.path.join(
-                APP_BACKUP_DIR, str(TIME_STAMP) + "-cacao_accounting_backup.db"
-            )
-        )
-        copyfile(file, BACKUP_FILE)
-
-    else:
-        inicia_base_de_datos(app=app, user=user, passwd=passwd)
 
 
 class NewDabataseWin(customtkinter.CTkToplevel):
@@ -174,7 +160,9 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         self.new_passwd = self.npswd.get()
 
         try:
-            init_db(self.DATABASE_FILE, self.app, self.new_user, self.new_passwd)
+            from cacao_accounting.database.helpers import inicia_base_de_datos
+
+            inicia_base_de_datos(self.app, self.new_user, self.new_passwde)
             self.message = CTkMessagebox(
                 title="Confirmación",
                 icon="check",
@@ -186,13 +174,13 @@ class NewDabataseWin(customtkinter.CTkToplevel):
                 icon="cancel",
                 message="Hubo un error al crear la base de datos.",
             )
-        self.destroy()
+        self.withdraw()
 
 
 class SetBackupDir(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.geometry("400x300")
+        self.geometry("250x150")
 
         self.label = customtkinter.CTkLabel(
             self, text="Seleccione carpeta de respaldos:"
@@ -229,7 +217,7 @@ class SetBackupDir(customtkinter.CTkToplevel):
                     message="Hubo un error al establecer la carpeta de repaldos.",
                 )
 
-        self.destroy()
+        self.withdraw()
 
 
 class RestoreDabataseWin(customtkinter.CTkToplevel):
@@ -299,10 +287,14 @@ class App(customtkinter.CTk):
         customtkinter.set_default_color_theme("green")
         customtkinter.set_appearance_mode("system")
         self.title("Cacao Accounting Desktop")
-        self.geometry("550x485")
+        self.geometry("540x520")
         self.logo = customtkinter.CTkImage(
             Image.open(os.path.join(os.getcwd(), "assets", "CacaoAccounting.png")),
             size=(500, 150),
+        )
+        self.bmo = customtkinter.CTkImage(
+            Image.open(os.path.join(os.getcwd(), "assets", "bmosoluciones.png")),
+            size=(120, 40),
         )
 
         self.home = customtkinter.CTkFrame(
@@ -363,10 +355,17 @@ class App(customtkinter.CTk):
 
         self.select_db = customtkinter.CTkOptionMenu(
             self.home,
-            values=DB_FILES,
+            values=get_database_file_list(),
             command=self.create_sqlite_url,
         )
         self.select_db.grid(row=5, column=0, padx=10, pady=5, sticky="s")
+
+        self.select_db_note = customtkinter.CTkLabel(
+            self.home,
+            text="Si la base de datos no se muestra intente cerrar y volver a abrir el programa.",
+        )
+
+        self.select_db_note.grid(row=6, column=0, padx=10, pady=5, sticky="s")
 
         self.init_server_ico = customtkinter.CTkImage(
             Image.open(os.path.join(os.getcwd(), "assets", "play-fill.png")),
@@ -386,22 +385,7 @@ class App(customtkinter.CTk):
             command=self.run_wsgi_server,
             image=self.init_server_ico,
         )
-        self.init_server.grid(row=6, column=0, padx=10, pady=5, sticky="s")
-
-        self.reload = customtkinter.CTkButton(
-            self.home,
-            corner_radius=20,
-            height=40,
-            border_spacing=10,
-            text="Reiniciar Cacao Accounting",
-            bg_color="transparent",
-            text_color=("gray10", "gray90"),
-            hover_color=("gray70", "gray30"),
-            anchor="w",
-            command=self.reiniciar_pantalla,
-            image=self.restore_db_ico,
-        )
-        self.reload.grid(row=7, column=0, padx=10, pady=5, sticky="s")
+        self.init_server.grid(row=7, column=0, padx=10, pady=5, sticky="s")
 
         self.backup_dir_ico = customtkinter.CTkImage(
             Image.open(os.path.join(os.getcwd(), "assets", "sliders.png")),
@@ -422,6 +406,9 @@ class App(customtkinter.CTk):
             image=self.backup_dir_ico,
         )
         self.backup_dir.grid(row=8, column=0, padx=10, pady=5, sticky="s")
+
+        self.home_bmo_logo = customtkinter.CTkLabel(self.home, text="", image=self.bmo)
+        self.home_bmo_logo.grid(row=9, column=0, padx=20, pady=5)
 
         self.app_server = FlaskUI(
             app=create_app(
@@ -455,17 +442,13 @@ class App(customtkinter.CTk):
         else:
             self.toplevel_window.focus()
 
-    def reiniciar_pantalla(self):
-        self.destroy()
-        exec(open("cacaoaccounting.pyw").read())
-
     def run_wsgi_server(self):
         self.DB_FILE = Path(os.path.join(APP_DATA_DIR, self.select_db.get()))
         self.DB_BACKUP = Path(
             os.path.join(
                 get_backup_path(),
                 str(datetime.today().strftime("%Y-%m-%d"))
-                + " backup "
+                + "-cacao_accounting_backup-"
                 + os.path.basename(self.DB_FILE),
             )
         )
