@@ -62,6 +62,7 @@ Section "Cacao Accounting" SecDummy
   File README.md
   File /r assets
   File /r pydist
+  File /r cacao_accounting_desktop
 
   ;Store installation folder
   WriteRegStr HKCU "Software\CacaoAccountingDesktop" "" $INSTDIR
