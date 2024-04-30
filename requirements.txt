@@ -1,5 +1,5 @@
 appdirs
 cacao-accounting
 flaskwebgui
+kivy
 pillow
-wxpython

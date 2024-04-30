@@ -19,7 +19,18 @@ if sys.executable.endswith("pythonw.exe"):
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# First things, first. Import the wxPython package.
-from cacao_accounting_desktop import init_app
+from kivy.app import App
+from kivy.uix.widget import Widget
 
-init_app()
+
+class PongGame(Widget):
+    pass
+
+
+class PongApp(App):
+    def build(self):
+        return PongGame()
+
+
+if __name__ == "__main__":
+    PongApp().run()
