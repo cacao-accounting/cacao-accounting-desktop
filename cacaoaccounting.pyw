@@ -1,3 +1,9 @@
+import sys, os
+
+if sys.executable.endswith("pythonw.exe"):
+    sys.stdout = open(os.devnull, "w")
+    sys.stderr = open(os.path.join(os.getenv("TEMP"), "stderr-{}".format(os.path.basename(sys.argv[0]))), "w")
+
 # -*- coding: utf-8 -*-
 # Copyright 2024 BMO Soluciones
 #
@@ -13,8 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# First things, first. Import the wxPython package.
+from cacao_accounting_desktop import init_app
 
-if __name__ == "__main__":
-    from cacao_accounting_desktop import init_app
-
-    init_app()
+init_app()

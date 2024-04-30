@@ -30,78 +30,21 @@ Accounting project.
 
 Several steps are necessary to create a windows executable:
 
-1. Download [WinPython 3.8.10](https://github.com/winpython/winpython/releases/download/4.3.20210620/Winpython32-3.8.10.0dot.exe), this contain a portable version of python suitable to run Cacao Accounting as a desktop app.
+1. Install pyvan to generate a Windows executable:
 
 ```
-Please note that there is no formal requirement on the Python version,
-Python 3.8.10 is taken as the base because it is the last stable version
-to support Windows 7.
-
-Support for Windows 7 ended on January 14, 2020, however some people may
-find it useful to be able to run Cacao Accounting on Windows 7 (it is up
-to the user to use a version of their operating system without manufacturer
-support, updating the operating system version is highly recommended).
-
-The 32-bit version must be functional but it is recommended to at least
-use a Core i3 processor or higher, which are 64-bit processors.
-
-It is possible that future versions of this project will update to a more
-recent version of python.
+pip install pyvan
 ```
 
-3. Uncompress WinPython 3.8.10, this will create a directory name `WPy64-38100` and inside this directory a copy of Python portable named `python-3.8.10.amd64`
-
-4. Copy the content of `python-3.8.10.amd64` to the `pydist` in the same directory that the script `cacaoaccounting.pyw`, your working directory should be like this:
+2. Create a Windows executable with:
 
 ```
-work-dir:
- |-assets
- |-cacaoaccounting.pyw
- |-LICENSE
- |-pydist
-  |-python.exe
-  |-[support files to the python portable enviroment]
- |-README.md
- |-requirements.txt
- |-setup.nsi
-```
-
-4. Install requirements inside the python portable enviroment with:
-
-```
-pydist\python.exe -m pip install -r requirements.txt
-```
-
-5. Ensure the python portable enviroment can run the scritp with:
-
-`pydist\python.exe cacaoaccounting.pyw`
-
-6. Generate a Windows executable with:
-
-```
-python -m pip install gen-exe
-gen-exe --hide-console cacaoaccounting.exe "{EXE_DIR}\\pydist\\python.exe cacaoaccounting.pyw" --icon-file assets/icon.ico
-```
-
-Your working directory now will have a Windows executable:
-
-```
-work-dir:
- |-assets
- |-cacaoaccounting.pyw
- |-cacaoaccounting.exe
- |-LICENSE
- |-pydist
-  |-python.exe
-  |-[support files to the python portable enviroment]
- |-README.md
- |-requirements.txt
- |-setup.nsi
+python van.py
 ```
 
 Doble click on the executable to verify it works.
 
-7. Create a Windows installer with [nsis](https://nsis.sourceforge.io/Main_Page) using the `setup.nsi`, this will create a installer that can be shared to final users.
+3. Create a Windows installer with [nsis](https://nsis.sourceforge.io/Main_Page) using the `setup.nsi`, this will create a installer that can be shared to final users.
 
 ```
 Please consider that .exe installers, unlike .msi installers, may represent a danger

@@ -56,13 +56,13 @@ Section "Cacao Accounting" SecDummy
   SetOutPath "$INSTDIR"
 
   ;ADD YOUR OWN FILES HERE
-  File cacaoaccounting.exe
-  File cacaoaccounting.pyw
-  File LICENSE
-  File README.md
-  File /r assets
-  File /r pydist
-  File /r cacao_accounting_desktop
+  File dist\cacaoaccounting.exe
+  File dist\cacaoaccounting.pyw
+  File dist\LICENSE
+  File dist\README.md
+  File /r dist\assets
+  File /r dist\cacao_accounting_desktop
+  File /r dist\pydist
 
   ;Store installation folder
   WriteRegStr HKCU "Software\CacaoAccountingDesktop" "" $INSTDIR
