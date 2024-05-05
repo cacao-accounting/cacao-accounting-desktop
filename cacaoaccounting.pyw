@@ -19,18 +19,7 @@ if sys.executable.endswith("pythonw.exe"):
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from kivy.app import App
-from kivy.uix.widget import Widget
-
-
-class PongGame(Widget):
-    pass
-
-
-class PongApp(App):
-    def build(self):
-        return PongGame()
-
+from cacao_accounting_desktop import init_app
 
 if __name__ == "__main__":
-    PongApp().run()
+    init_app()
