@@ -1,5 +1,6 @@
 appdirs
-cacao-accounting
+#cacao-accounting
+staging-cacao-accounting
 flaskwebgui
 kivy
 pillow
