@@ -39,6 +39,7 @@ pip install pyvan
 2. Create a Windows executable with:
 
 ```
+rm -rf dist/
 python van.py
 ```
 

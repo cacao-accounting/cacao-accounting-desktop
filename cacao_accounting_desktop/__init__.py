@@ -14,7 +14,6 @@ from appdirs import AppDirs
 from cacao_accounting import create_app
 from flaskwebgui import FlaskUI
 from PIL import Image
-import wx
 
 if TYPE_CHECKING:
     from flask import Flask
@@ -79,22 +78,21 @@ def get_backup_path():
         return APP_BACKUP_DIR
 
 
-class HelloFrame(wx.Frame):
+import kivy
+from kivy.app import App
+from kivy.config import Config
+from kivy.uix.label import Label
 
-    def __init__(self, *args, **kw):
-        super(HelloFrame, self).__init__(*args, **kw)
 
-        panel = wx.Panel(self)
+Config.set("kivy", "window_icon", "assets\CacaoAccounting.png")
 
-        st = wx.StaticText(panel, label="Cacao Accounting Desktop")
-        font = st.GetFont()
-        font.PointSize += 10
-        font = font.Bold()
-        st.SetFont(font)
+
+class MyApp(App):
+    title = "Cacao Accounting Desktop"
+
+    def build(self):
+        pass
 
 
 def init_app():
-    app = wx.App()
-    frm = HelloFrame(None, title="Cacao Accounting")
-    frm.Show()
-    app.MainLoop()
+    MyApp().run()

@@ -2,12 +2,12 @@
 ;Include Modern UI
 
   !include "MUI2.nsh"
-  !define MUI_ICON "assets\icon.ico"
+  !define MUI_ICON "cacao_accounting_desktop\assets\icon.ico"
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "assets\CacaoAccounting.bmp"
+  !define MUI_HEADERIMAGE_BITMAP "cacao_accounting_desktop\assets\CacaoAccounting.bmp"
   !define MUI_HEADERIMAGE_RIGHT
-  !define MUI_WELCOMEFINISHPAGE_BITMAP "assets\CacaoAccountingRotate.bmp"
-  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "assets\CacaoAccountingRotate.bmp"
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "cacao_accounting_desktop\assets\CacaoAccountingRotate.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "cacao_accounting_desktop\assets\CacaoAccountingRotate.bmp"
 
 ;--------------------------------
 ;General
@@ -60,7 +60,6 @@ Section "Cacao Accounting" SecDummy
   File dist\cacaoaccounting.pyw
   File dist\LICENSE
   File dist\README.md
-  File /r dist\assets
   File /r dist\cacao_accounting_desktop
   File /r dist\pydist
 
@@ -90,7 +89,6 @@ Section "Uninstall"
   Delete "$INSTDIR\LICENSE"
   Delete "$INSTDIR\README.md"
   Delete "$DESKTOP\Cacao Accounting.lnk"
-  RMDir /r "$INSTDIR\assets"
   RMDir /r "$INSTDIR\pydist"
 
   Delete "$SMPROGRAMS\Cacao Accounting\Cacao Accounting.lnk"

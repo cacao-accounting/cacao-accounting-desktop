@@ -9,8 +9,7 @@ OPTIONS = {
     "build_dir": "dist",
     "pydist_sub_dir": "pydist",
     "source_sub_dir": "",
-    "icon_file": "assets/icon.ico",
-    "verbose": False,
+    "icon_file": "cacao_accounting_desktop/assets/icon.ico",
 }
 
 pyvan.build(**OPTIONS)
