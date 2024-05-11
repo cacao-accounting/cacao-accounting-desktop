@@ -15,6 +15,23 @@ from cacao_accounting import create_app
 from flaskwebgui import FlaskUI
 from PIL import Image
 
+
+# ---------------------------------------------------------------------------------------
+# User interface imports
+# ---------------------------------------------------------------------------------------
+from kivy.app import App
+from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+
+
+# ---------------------------------------------------------------------------------------
+# Optional type checking imports
+# ---------------------------------------------------------------------------------------
 if TYPE_CHECKING:
     from flask import Flask
 
@@ -31,7 +48,7 @@ SECURE_KEY_FILE = Path(os.path.join(APP_CONFIG_DIR, "secret.key"))
 BACKUP_PATH_FILE = Path(os.path.join(APP_CONFIG_DIR, "backup.path"))
 APP_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIRECTORY = os.path.join(APP_DIRECTORY, "assets")
-
+FILE_LIST = os.listdir(APP_DATA_DIR)
 
 # ---------------------------------------------------------------------------------------
 # Asegura que los directorios utilizados por la aplicación existen
@@ -39,9 +56,11 @@ ASSETS_DIRECTORY = os.path.join(APP_DIRECTORY, "assets")
 APP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
 APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-FILE_LIST = os.listdir(APP_DATA_DIR)
 
 
+# ---------------------------------------------------------------------------------------
+# Funciones auxiliares
+# ---------------------------------------------------------------------------------------
 def get_database_file_list():
     DB_FILES = []
     for file in FILE_LIST:
@@ -80,16 +99,9 @@ def get_backup_path():
         return APP_BACKUP_DIR
 
 
-from kivy.app import App
-from kivy.core.window import Window
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.image import Image
-from kivy.uix.label import Label
-
-
+# ---------------------------------------------------------------------------------------
+# Interface grafica
+# ---------------------------------------------------------------------------------------
 class MyApp(App):
 
     Window.size = (300, 400)
@@ -108,12 +120,14 @@ class MyApp(App):
 
         db_select = DropDown()
         for file in get_database_file_list():
-            label = Button(text=file, size_hint_y=None, height=30)
+            label = Button(text=file, size_hint_y=None, height=44)
+            label.bind(on_release=lambda label: db_select.select(label.text))
             db_select.add_widget(label)
 
         select_db_button = Button(text="Seleccionar base de datos")
-        select_db_button.add_widget(db_select)
         select_db_button.bind(on_press=db_select.open)
+
+        db_select.bind(on_select=lambda instance, x: setattr(select_db_button, "text", x))
 
         box.add_widget(select_db_button)
 
@@ -131,5 +145,8 @@ class MyApp(App):
         return window
 
 
+# ---------------------------------------------------------------------------------------
+# Grafical entry point
+# ---------------------------------------------------------------------------------------
 def init_app():
     MyApp().run()
