@@ -29,6 +29,8 @@ APP_HOME_DIR = os.path.expanduser("~/Cacao Accounting")
 APP_BACKUP_DIR = Path(os.path.join(APP_HOME_DIR, "Backups"))
 SECURE_KEY_FILE = Path(os.path.join(APP_CONFIG_DIR, "secret.key"))
 BACKUP_PATH_FILE = Path(os.path.join(APP_CONFIG_DIR, "backup.path"))
+APP_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIRECTORY = os.path.join(APP_DIRECTORY, "assets")
 
 
 # ---------------------------------------------------------------------------------------
@@ -78,20 +80,55 @@ def get_backup_path():
         return APP_BACKUP_DIR
 
 
-import kivy
 from kivy.app import App
-from kivy.config import Config
+from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 
 
-Config.set("kivy", "window_icon", "assets\CacaoAccounting.png")
-
-
 class MyApp(App):
+
+    Window.size = (300, 400)
     title = "Cacao Accounting Desktop"
 
     def build(self):
-        pass
+        window = GridLayout()
+        window.cols = 1
+
+        window.add_widget(Image(source=str(os.path.join(ASSETS_DIRECTORY, "CacaoAccounting.png"))))
+
+        new_db_button = Button(text="Crear una nueva base de datos")
+        window.add_widget(new_db_button)
+
+        box = BoxLayout(orientation="vertical")
+
+        db_select = DropDown()
+        for file in get_database_file_list():
+            label = Button(text=file, size_hint_y=None, height=30)
+            db_select.add_widget(label)
+
+        select_db_button = Button(text="Seleccionar base de datos")
+        select_db_button.add_widget(db_select)
+        select_db_button.bind(on_press=db_select.open)
+
+        box.add_widget(select_db_button)
+
+        window.add_widget(box)
+
+        init_server = Button(text="Iniciar Cacao Accounting")
+        window.add_widget(init_server)
+
+        db_restore = Button(text="Restaurar respaldo")
+        window.add_widget(db_restore)
+
+        set_restore_path = Button(text="Configurar carpeta de respaldo")
+        window.add_widget(set_restore_path)
+
+        return window
 
 
 def init_app():
