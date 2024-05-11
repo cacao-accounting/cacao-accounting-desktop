@@ -3,7 +3,7 @@ name = "cacao-accounting-desktop"
 description = "Cacao Accounting Desktop App."
 readme = "README.md"
 requires-python = ">=3.8"
-version="2024.04"
+version="2024.05.11"
 authors = [
   {name = "BMO Soluciones", email = "development@bmogroup.solutions"},
 ]
@@ -22,7 +22,7 @@ classifiers = [
 dynamic = ["dependencies"]
 
 [project.gui-scripts]
-cacaoaccounting = "cacao_accounting_desktop:init_app"
+cacao_accounting_desktop = "cacao_accounting_desktop:init_app"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
