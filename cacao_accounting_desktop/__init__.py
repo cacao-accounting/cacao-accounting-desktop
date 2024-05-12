@@ -32,6 +32,9 @@ APP_HOME_DIR = os.path.expanduser("~/Cacao Accounting")
 APP_BACKUP_DIR = Path(os.path.join(APP_HOME_DIR, "Backups"))
 SECURE_KEY_FILE = Path(os.path.join(APP_CONFIG_DIR, "secret.key"))
 BACKUP_PATH_FILE = Path(os.path.join(APP_CONFIG_DIR, "backup.path"))
+APP_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIRECTORY = os.path.join(APP_DIRECTORY, "assets")
+FILE_LIST = os.listdir(APP_DATA_DIR)
 
 
 # ---------------------------------------------------------------------------------------
@@ -40,9 +43,11 @@ BACKUP_PATH_FILE = Path(os.path.join(APP_CONFIG_DIR, "backup.path"))
 APP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
 APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-FILE_LIST = os.listdir(APP_DATA_DIR)
 
 
+# ---------------------------------------------------------------------------------------
+# Funciones auxiliares
+# ---------------------------------------------------------------------------------------
 def get_database_file_list():
     DB_FILES = []
     for file in FILE_LIST:
@@ -81,6 +86,9 @@ def get_backup_path():
         return APP_BACKUP_DIR
 
 
+# ---------------------------------------------------------------------------------------
+# Interfaz grafica
+# ---------------------------------------------------------------------------------------
 class NewDabataseWin(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -259,11 +267,11 @@ class App(customtkinter.CTk):
         self.title("Cacao Accounting Desktop")
         self.geometry("540x520")
         self.logo = customtkinter.CTkImage(
-            Image.open(os.path.join(os.getcwd(), "assets", "CacaoAccounting.png")),
+            Image.open(os.path.join(ASSETS_DIRECTORY, "CacaoAccounting.png")),
             size=(500, 150),
         )
         self.bmo = customtkinter.CTkImage(
-            Image.open(os.path.join(os.getcwd(), "assets", "bmosoluciones.png")),
+            Image.open(os.path.join(ASSETS_DIRECTORY, "bmosoluciones.png")),
             size=(120, 40),
         )
 
@@ -274,7 +282,7 @@ class App(customtkinter.CTk):
         self.home_logo.grid(row=0, column=0, padx=20, pady=5)
 
         self.new_db_ico = customtkinter.CTkImage(
-            Image.open(os.path.join(os.getcwd(), "assets", "plus-circle.png")),
+            Image.open(os.path.join(ASSETS_DIRECTORY, "plus-circle.png")),
             size=(12, 12),
         )
 
@@ -294,7 +302,7 @@ class App(customtkinter.CTk):
         self.new_db.grid(row=2, column=0, padx=10, pady=5, sticky="s")
 
         self.restore_db_ico = customtkinter.CTkImage(
-            Image.open(os.path.join(os.getcwd(), "assets", "arrow-counterclockwise.png")),
+            Image.open(os.path.join(ASSETS_DIRECTORY, "arrow-counterclockwise.png")),
             size=(12, 12),
         )
 
@@ -332,7 +340,7 @@ class App(customtkinter.CTk):
         self.select_db_note.grid(row=6, column=0, padx=10, pady=5, sticky="s")
 
         self.init_server_ico = customtkinter.CTkImage(
-            Image.open(os.path.join(os.getcwd(), "assets", "play-fill.png")),
+            Image.open(os.path.join(ASSETS_DIRECTORY, "play-fill.png")),
             size=(12, 12),
         )
 
@@ -352,7 +360,7 @@ class App(customtkinter.CTk):
         self.init_server.grid(row=7, column=0, padx=10, pady=5, sticky="s")
 
         self.backup_dir_ico = customtkinter.CTkImage(
-            Image.open(os.path.join(os.getcwd(), "assets", "sliders.png")),
+            Image.open(os.path.join(ASSETS_DIRECTORY, "sliders.png")),
             size=(12, 12),
         )
 
@@ -432,6 +440,9 @@ class App(customtkinter.CTk):
             self.toplevel_window.focus()
 
 
+# ---------------------------------------------------------------------------------------
+# Entry point
+# ---------------------------------------------------------------------------------------
 def init_app():
     start_app = App()
     start_app.mainloop()
