@@ -184,20 +184,29 @@ class SetBackupDir(customtkinter.CTkToplevel):
 
     def backup(self):
         self.bk_dir = filedialog.askdirectory()
-        with open(BACKUP_PATH_FILE, "x") as f:
-            try:
-                f.write(self.bk_dir)
-                self.message = CTkMessagebox(
+        try:
+            with open(BACKUP_PATH_FILE, "x") as f:
+                try:
+                    f.write(self.bk_dir)
+                    self.message = CTkMessagebox(
                     title="Confirmación",
                     icon="check",
                     message="Carpeta de respaldos establecida correctamente.",
                 )
-            except:
-                self.message = CTkMessagebox(
+                except:
+                    self.message = CTkMessagebox(
                     title="Error",
                     icon="cancel",
                     message="Hubo un error al establecer la carpeta de repaldos.",
                 )
+        except FileExistsError:
+            self.message = CTkMessagebox(
+                    title="Error",
+                    icon="cancel",
+                    message="Ya ha establecido un directorio de respaldos.",
+                )
+
+
 
         self.withdraw()
 
