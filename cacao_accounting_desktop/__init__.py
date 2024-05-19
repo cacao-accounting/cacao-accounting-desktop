@@ -34,7 +34,6 @@ SECURE_KEY_FILE = Path(os.path.join(APP_CONFIG_DIR, "secret.key"))
 BACKUP_PATH_FILE = Path(os.path.join(APP_CONFIG_DIR, "backup.path"))
 APP_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIRECTORY = os.path.join(APP_DIRECTORY, "assets")
-FILE_LIST = os.listdir(APP_DATA_DIR)
 
 
 # ---------------------------------------------------------------------------------------
@@ -43,6 +42,12 @@ FILE_LIST = os.listdir(APP_DATA_DIR)
 APP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
 APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# ---------------------------------------------------------------------------------------
+# Se define aquí por: FileNotFoundError:
+# ---------------------------------------------------------------------------------------
+FILE_LIST = os.listdir(APP_DATA_DIR)
 
 
 # ---------------------------------------------------------------------------------------
