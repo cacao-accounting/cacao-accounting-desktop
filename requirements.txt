@@ -1,6 +1,6 @@
 appdirs
-staging-cacao-accounting
 customtkinter
 CTkMessagebox
 flaskwebgui
+staging-cacao-accounting
 pillow

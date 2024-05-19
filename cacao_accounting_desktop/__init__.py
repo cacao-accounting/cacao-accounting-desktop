@@ -146,7 +146,7 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         try:
             from cacao_accounting.database.helpers import inicia_base_de_datos
 
-            inicia_base_de_datos(self.app, self.new_user, self.new_passwde)
+            inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd)
             self.message = CTkMessagebox(
                 title="Confirmación",
                 icon="check",
