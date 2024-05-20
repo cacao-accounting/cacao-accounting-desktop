@@ -3,7 +3,7 @@ name = "staging-cacao-accounting-desktop"
 description = "Cacao Accounting Desktop App."
 readme = "README.md"
 requires-python = ">=3.8"
-version="2024.05.20"
+version="2024.05.22"
 authors = [
   {name = "BMO Soluciones", email = "development@bmogroup.solutions"},
 ]
@@ -19,6 +19,7 @@ classifiers = [
   'Programming Language :: Python :: 3.12',
   'Programming Language :: Python :: Implementation :: CPython'
 ]
+
 dynamic = ["dependencies"]
 
 [project.gui-scripts]
