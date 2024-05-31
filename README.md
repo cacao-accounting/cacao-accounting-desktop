@@ -16,9 +16,9 @@ install of Python.
 
 ## Cacao Accounting as stand alone executable for Windows.
 
-Please note thar this is not a native windows app, this mean a app compiled to run as windows executable,
-[Cacao Accounting](https://github.com/cacao-accounting/cacao-accounting) is a python wsgi app based is the
-[Flask Python Microframework](https://flask.palletsprojects.com/en/3.0.x/), but we use a simple hack thanks
+Please note that this is not a native windows app, this mean a
+app compiled to run as windows executable, [Cacao Accounting](https://github.com/cacao-accounting/cacao-accounting)
+is a python wsgi app based is the [Flask Python Microframework](https://flask.palletsprojects.com/en/3.0.x/), but we use a simple hack thanks
 to the [Flask Web Gui](https://github.com/ClimenteA/flaskwebgui) project to start a local wsgi server and
 open a browers windows so the user can interact with the app, this way we can simulate a local install of
 the app so accountans can use the app localy with out knowing how to set up a server.
