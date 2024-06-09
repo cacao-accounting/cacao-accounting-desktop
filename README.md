@@ -1,7 +1,7 @@
 ![Logo](https://raw.githubusercontent.com/cacao-accounting/cacao-accounting-desktop/main/cacao_accounting_desktop/assets/CacaoAccounting.png)
-[![Python application](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml/badge.svg)](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml)
 
 # Cacao Accounting Desktop
+[![Python application](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml/badge.svg)](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml)
 
 This is Cacao Accounting software packaged as a windows
 executable, so accountans can download the app and use it
