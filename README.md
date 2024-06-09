@@ -1,4 +1,5 @@
 ![Logo](https://raw.githubusercontent.com/cacao-accounting/cacao-accounting-desktop/main/cacao_accounting_desktop/assets/CacaoAccounting.png)
+[![Python application](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml/badge.svg)](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml)
 
 # Cacao Accounting Desktop
 
