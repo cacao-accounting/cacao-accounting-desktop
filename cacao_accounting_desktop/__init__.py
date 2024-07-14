@@ -61,16 +61,11 @@ APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ---------------------------------------------------------------------------------------
-# Se define aquí para evitar un error de directorio no encontrado.
-# ---------------------------------------------------------------------------------------
-FILE_LIST = os.listdir(APP_DATA_DIR)
-
-
-# ---------------------------------------------------------------------------------------
 # Funciones auxiliares
 # ---------------------------------------------------------------------------------------
 def get_database_file_list():
     """Return database files as a list. """
+    FILE_LIST = os.listdir(APP_DATA_DIR)
     DB_FILES = []
     for file in FILE_LIST:
         if file.endswith(".db"):
