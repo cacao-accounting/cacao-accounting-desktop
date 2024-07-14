@@ -1,3 +1,19 @@
+# Copyright 2024 William José Moreno Reyes
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Cacao Accounting como aplicación de escritorio."""
+
 # ---------------------------------------------------------------------------------------
 # Libreria estandar
 # ---------------------------------------------------------------------------------------
@@ -45,7 +61,7 @@ APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ---------------------------------------------------------------------------------------
-# Se define aquí por: FileNotFoundError:
+# Se define aquí para evitar un error de directorio no encontrado.
 # ---------------------------------------------------------------------------------------
 FILE_LIST = os.listdir(APP_DATA_DIR)
 
@@ -54,6 +70,7 @@ FILE_LIST = os.listdir(APP_DATA_DIR)
 # Funciones auxiliares
 # ---------------------------------------------------------------------------------------
 def get_database_file_list():
+    """Return database files as a list. """
     DB_FILES = []
     for file in FILE_LIST:
         if file.endswith(".db"):
