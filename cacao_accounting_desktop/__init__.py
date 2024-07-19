@@ -64,7 +64,7 @@ APP_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 # Funciones auxiliares
 # ---------------------------------------------------------------------------------------
 def get_database_file_list():
-    """Return database files as a list. """
+    """Return database files as a list."""
     FILE_LIST = os.listdir(APP_DATA_DIR)
     DB_FILES = []
     for file in FILE_LIST:
@@ -111,22 +111,22 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         super().__init__(*args, **kwargs)
         self.geometry("400x300")
 
-        self.label = customtkinter.CTkLabel(self, text="Crear una nueva base de datos:")
+        self.label = customtkinter.CTkLabel(self, text="Crear Nueva Base de Datos:")
         self.label.grid(row=0, padx=20, pady=5)
 
-        self.tag = customtkinter.CTkLabel(self, text="Defina un nombre a la base de datos:", fg_color="transparent")
+        self.tag = customtkinter.CTkLabel(self, text="Nombre de la Nueva Base de Datos:", fg_color="transparent")
         self.tag.grid(row=1)
 
         self.dbname = customtkinter.CTkEntry(self, placeholder_text="dbname.db")
         self.dbname.grid(row=2)
 
-        self.user = customtkinter.CTkLabel(self, text="Ingrese el nombre de usuario:", fg_color="transparent")
+        self.user = customtkinter.CTkLabel(self, text="Nombre de Usuario:", fg_color="transparent")
         self.user.grid(row=3)
 
         self.nuser = customtkinter.CTkEntry(self, placeholder_text="Usuario")
         self.nuser.grid(row=4)
 
-        self.pwd = customtkinter.CTkLabel(self, text="Ingrese una clave de acceso:", fg_color="transparent")
+        self.pwd = customtkinter.CTkLabel(self, text="Ingrese Clave de Acceso:", fg_color="transparent")
         self.pwd.grid(row=5)
 
         self.npswd = customtkinter.CTkEntry(self, placeholder_text="Clave de Acceso", show="*")
@@ -183,14 +183,14 @@ class SetBackupDir(customtkinter.CTkToplevel):
         super().__init__(*args, **kwargs)
         self.geometry("250x150")
 
-        self.label = customtkinter.CTkLabel(self, text="Seleccione carpeta de respaldos:")
+        self.label = customtkinter.CTkLabel(self, text="Seleccione Carpeta de Respaldos:")
         self.label.grid(row=0, padx=20, pady=5)
         self.set_backup_dir = customtkinter.CTkButton(
             self,
             corner_radius=20,
             height=40,
             border_spacing=10,
-            text="Establecer carpeta de respaldo.",
+            text="Establecer Carpeta de Respaldo.",
             bg_color="transparent",
             text_color=("gray10", "gray90"),
             hover_color=("gray70", "gray30"),
@@ -206,24 +206,22 @@ class SetBackupDir(customtkinter.CTkToplevel):
                 try:
                     f.write(self.bk_dir)
                     self.message = CTkMessagebox(
-                    title="Confirmación",
-                    icon="check",
-                    message="Carpeta de respaldos establecida correctamente.",
-                )
+                        title="Confirmación",
+                        icon="check",
+                        message="Carpeta de respaldos establecida correctamente.",
+                    )
                 except:
                     self.message = CTkMessagebox(
-                    title="Error",
-                    icon="cancel",
-                    message="Hubo un error al establecer la carpeta de repaldos.",
-                )
+                        title="Error",
+                        icon="cancel",
+                        message="Hubo un error al establecer la carpeta de repaldos.",
+                    )
         except FileExistsError:
             self.message = CTkMessagebox(
-                    title="Error",
-                    icon="cancel",
-                    message="Ya ha establecido un directorio de respaldos.",
-                )
-
-
+                title="Error",
+                icon="cancel",
+                message="Ya ha establecido un directorio de respaldos.",
+            )
 
         self.withdraw()
 
@@ -233,10 +231,10 @@ class RestoreDabataseWin(customtkinter.CTkToplevel):
         super().__init__(*args, **kwargs)
         self.geometry("400x300")
 
-        self.label = customtkinter.CTkLabel(self, text="Seleccione una base de datos a restaurar:")
+        self.label = customtkinter.CTkLabel(self, text="Seleccione Base de Datos a Restaurar:")
         self.label.grid(row=0, padx=20, pady=5)
 
-        self.tag = customtkinter.CTkLabel(self, text="Defina un nombre a la base de datos:", fg_color="transparent")
+        self.tag = customtkinter.CTkLabel(self, text="Defina el Nombre de la Base de Datos:", fg_color="transparent")
         self.tag.grid(row=1)
 
         self.entry = customtkinter.CTkEntry(self, placeholder_text="Nombre")
@@ -317,7 +315,7 @@ class App(customtkinter.CTk):
             corner_radius=20,
             height=40,
             border_spacing=10,
-            text="Crear nueva base de datos",
+            text="Crear Nueva Base de Datos",
             bg_color="transparent",
             text_color=("gray10", "gray90"),
             hover_color=("gray70", "gray30"),
@@ -347,7 +345,7 @@ class App(customtkinter.CTk):
         )
         self.restore_db.grid(row=3, column=0, padx=10, pady=5, sticky="s")
 
-        self.select_db_title = customtkinter.CTkLabel(self.home, text="Seleccionar base de datos existente:")
+        self.select_db_title = customtkinter.CTkLabel(self.home, text="Seleccionar Base de Datos:")
 
         self.select_db_title.grid(row=4, column=0, padx=10, pady=5, sticky="s")
 
@@ -395,7 +393,7 @@ class App(customtkinter.CTk):
             corner_radius=20,
             height=40,
             border_spacing=10,
-            text="Configurar Carpeta de respaldo",
+            text="Configurar Carpeta de Respaldo",
             bg_color="transparent",
             text_color=("gray10", "gray90"),
             hover_color=("gray70", "gray30"),
