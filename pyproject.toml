@@ -1,5 +1,5 @@
 [project]
-name = "staging-cacao-accounting-desktop"
+name = "cacao-accounting-desktop"
 description = "Cacao Accounting Desktop App."
 readme = "README.md"
 requires-python = ">=3.8"
