@@ -34,6 +34,7 @@ from CTkMessagebox import CTkMessagebox
 from flaskwebgui import FlaskUI
 from PIL import Image
 
+
 if TYPE_CHECKING:
     from flask import Flask
 
@@ -138,6 +139,9 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         self.npswd = customtkinter.CTkEntry(self, placeholder_text="Clave de Acceso", show="*")
         self.npswd.grid(row=6)
 
+        self.npswd2 = customtkinter.CTkEntry(self, placeholder_text="Confirmar Clave", show="*")
+        self.npswd2.grid(row=7)
+
         self.create = customtkinter.CTkButton(
             self,
             corner_radius=20,
@@ -150,11 +154,16 @@ class NewDabataseWin(customtkinter.CTkToplevel):
             anchor="w",
             command=self.create_db,
         )
-        self.create.grid(row=7)
+        self.create.grid(row=8)
 
     def create_db(self):
         self.DATABASE_FILE = Path(os.path.join(APP_DATA_DIR, self.dbname.get()))
         self.DATABASE_URI = "sqlite:///" + str(self.DATABASE_FILE)
+
+        from cacao_accounting.logs import log
+
+        log.warning(self.DATABASE_FILE)
+        log.warning(self.DATABASE_URI)
 
         self.app = create_app(
             {
@@ -165,22 +174,34 @@ class NewDabataseWin(customtkinter.CTkToplevel):
 
         self.new_user = self.nuser.get()
         self.new_passwd = self.npswd.get()
+        self.new_passwd2 = self.npswd2.get()
+        self.checkpw = self.new_passwd == self.new_passwd2
 
-        try:
-            from cacao_accounting.database.helpers import inicia_base_de_datos
-
-            inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd)
-            self.message = CTkMessagebox(
-                title="Confirmación",
-                icon="check",
-                message="Base de datos creada correctamente.",
-            )
-        except:
+        if self.checkpw is not True:
             self.message = CTkMessagebox(
                 title="Error",
                 icon="cancel",
-                message="Hubo un error al crear la base de datos.",
+                message="Las contraseñas no coinciden.",
             )
+
+        else:
+
+            try:
+                from cacao_accounting.database.helpers import inicia_base_de_datos
+
+                inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd, with_examples=False)
+                self.message = CTkMessagebox(
+                    title="Confirmación",
+                    icon="check",
+                    message="Base de datos creada correctamente.",
+                )
+            except:
+                self.message = CTkMessagebox(
+                    title="Error",
+                    icon="cancel",
+                    message="Hubo un error al crear la base de datos.",
+                )
+
         self.withdraw()
 
 
