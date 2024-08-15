@@ -94,9 +94,11 @@ def get_secret_key():
             return f.readline()
     else:
         from uuid import uuid4
+        from ulid import ULID
 
         UUID = uuid4()
-        SECURE_KEY = str(UUID)
+        ULID = ULID()
+        SECURE_KEY = str(ULID).join(":", str(UUID))
         with open(SECURE_KEY_FILE, "x") as f:
             f.write(SECURE_KEY)
         return SECURE_KEY
@@ -160,47 +162,54 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         self.DATABASE_FILE = Path(os.path.join(APP_DATA_DIR, self.dbname.get()))
         self.DATABASE_URI = "sqlite:///" + str(self.DATABASE_FILE)
 
-        from cacao_accounting.logs import log
-
-        log.warning(self.DATABASE_FILE)
-        log.warning(self.DATABASE_URI)
-
-        self.app = create_app(
-            {
-                "SECRET_KEY": get_secret_key(),
-                "SQLALCHEMY_DATABASE_URI": self.DATABASE_URI,
-            }
-        )
-
-        self.new_user = self.nuser.get()
-        self.new_passwd = self.npswd.get()
-        self.new_passwd2 = self.npswd2.get()
-        self.checkpw = self.new_passwd == self.new_passwd2
-
-        if self.checkpw is not True:
+        if not os.path.exists(self.DATABASE_FILE):
+            open(self.DATABASE_FILE, "w").close()
+            self.NEW_DB_FILE = True
+        else:
             self.message = CTkMessagebox(
                 title="Error",
                 icon="cancel",
-                message="Las contraseñas no coinciden.",
+                message="Ya existe una base de datos con ese nombre.",
+            )
+            self.NEW_DB_FILE = False
+
+        if self.NEW_DB_FILE:
+            self.app = create_app(
+                {
+                    "SECRET_KEY": get_secret_key(),
+                    "SQLALCHEMY_DATABASE_URI": self.DATABASE_URI,
+                }
             )
 
-        else:
+            self.new_user = self.nuser.get()
+            self.new_passwd = self.npswd.get()
+            self.new_passwd2 = self.npswd2.get()
+            self.checkpw = self.new_passwd == self.new_passwd2
 
-            try:
-                from cacao_accounting.database.helpers import inicia_base_de_datos
-
-                inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd, with_examples=False)
-                self.message = CTkMessagebox(
-                    title="Confirmación",
-                    icon="check",
-                    message="Base de datos creada correctamente.",
-                )
-            except:
+            if self.checkpw is not True:
                 self.message = CTkMessagebox(
                     title="Error",
                     icon="cancel",
-                    message="Hubo un error al crear la base de datos.",
+                    message="Las contraseñas no coinciden.",
                 )
+
+            else:
+
+                try:
+                    from cacao_accounting.database.helpers import inicia_base_de_datos
+
+                    inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd, with_examples=False)
+                    self.message = CTkMessagebox(
+                        title="Confirmación",
+                        icon="check",
+                        message="Base de datos creada correctamente.",
+                    )
+                except:
+                    self.message = CTkMessagebox(
+                        title="Error",
+                        icon="cancel",
+                        message="Hubo un error al crear la base de datos.",
+                    )
 
         self.withdraw()
 
