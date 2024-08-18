@@ -98,7 +98,7 @@ def get_secret_key():
 
         UUID = uuid4()
         ULID = ULID()
-        SECURE_KEY = str(ULID).join(":", str(UUID))
+        SECURE_KEY = str(ULID) + ":" str(UUID)
         with open(SECURE_KEY_FILE, "x") as f:
             f.write(SECURE_KEY)
         return SECURE_KEY
