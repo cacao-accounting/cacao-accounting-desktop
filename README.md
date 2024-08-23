@@ -1,6 +1,7 @@
 ![Logo](https://raw.githubusercontent.com/cacao-accounting/cacao-accounting-desktop/main/cacao_accounting_desktop/assets/CacaoAccounting.png)
 
 # Cacao Accounting Desktop
+
 [![Python application](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml/badge.svg)](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml)
 
 This is Cacao Accounting software packaged as a windows
@@ -81,7 +82,7 @@ pydist\python.exe -m pip install -r requirements.txt
 
 ```
 python -m pip install gen-exe
-gen-exe --hide-console cacaoaccounting.exe "{EXE_DIR}\\pydist\\python.exe cacaoaccounting.pyw" --icon-file assets/icon.ico
+gen-exe --hide-console cacaoaccounting.exe "{EXE_DIR}\\pydist\\python.exe cacaoaccounting.pyw" --icon-file cacao_accounting_desktop/assets/icon.ico
 ```
 
 Your working directory now will have a Windows executable:
