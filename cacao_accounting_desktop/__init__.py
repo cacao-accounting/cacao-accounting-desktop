@@ -188,7 +188,6 @@ class NewDabataseWin(customtkinter.CTkToplevel):
                 )
 
             else:
-
                 try:
                     from cacao_accounting.database.helpers import inicia_base_de_datos
 
@@ -382,7 +381,6 @@ class App(customtkinter.CTk):
         self.select_db = customtkinter.CTkOptionMenu(
             self.home,
             values=get_database_file_list(),
-            command=self.create_sqlite_url,
         )
         self.select_db.grid(row=5, column=0, padx=10, pady=5, sticky="s")
 
@@ -436,25 +434,10 @@ class App(customtkinter.CTk):
         self.home_bmo_logo = customtkinter.CTkLabel(self.home, text="", image=self.bmo)
         self.home_bmo_logo.grid(row=9, column=0, padx=20, pady=5)
 
-        self.app_server = FlaskUI(
-            app=create_app(
-                {
-                    "SECRET_KEY": get_secret_key(),
-                    "SQLALCHEMY_DATABASE_URI": self.create_sqlite_url(self.select_db.get()),
-                }
-            ),
-            server="flask",
-            port=9871,
-            fullscreen=False,
-            profile_dir_prefix="cacao_accounting",
-            height=600,
-            width=1200,
-        )
-
         self.toplevel_window = None
 
-    def create_sqlite_url(self, file_name):
-        self.DATABASE_FILE = Path(os.path.join(APP_DATA_DIR, file_name))
+    def create_sqlite_url(self):
+        self.DATABASE_FILE = Path(os.path.join(APP_DATA_DIR, self.select_db.get()))
         self.DATABASE_URI = "sqlite:///" + str(self.DATABASE_FILE)
 
         return self.DATABASE_URI
@@ -477,6 +460,20 @@ class App(customtkinter.CTk):
         if not Path.exists(self.DB_BACKUP):
             copyfile(self.DB_FILE, self.DB_BACKUP)
         self.withdraw()
+        self.app_server = FlaskUI(
+            app=create_app(
+                {
+                    "SECRET_KEY": get_secret_key(),
+                    "SQLALCHEMY_DATABASE_URI": self.create_sqlite_url(),
+                }
+            ),
+            server="flask",
+            port=9871,
+            fullscreen=False,
+            profile_dir_prefix="cacao_accounting",
+            height=600,
+            width=1200,
+        )
         self.app_server.run()
 
     def new_database(self):
