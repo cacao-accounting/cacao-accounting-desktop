@@ -13,8 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from os import environ
+
+# ---------------------------------------------------------------------------------------
+# Modo de Escritorio
+# ---------------------------------------------------------------------------------------
+environ["CACAO_ACCOUNTING_DESKTOP"] = "ok"
+
 
 if __name__ == "__main__":
+    assert environ.get("CACAO_ACCOUNTING_DESKTOP") == "ok"
     from cacao_accounting_desktop import init_app
 
     init_app()
