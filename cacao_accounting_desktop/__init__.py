@@ -83,22 +83,23 @@ def get_secret_key():
     Is SECURE_KEY_FILE exist will read the content of the file a return it,
     if not will generate a ramond string a save the value for future use.
     """
-    if Path.exists(SECURE_KEY_FILE):
+    if Path.exists(SECURE_KEY_FILE) and os.access(SECURE_KEY_FILE, os.R_OK):
         with open(SECURE_KEY_FILE) as f:
             return f.readline()
     else:
         from uuid import uuid4
         from ulid import ULID
 
-        UUID = uuid4()
-        ULID = ULID()
-        SECURE_KEY = str(ULID) + ":" + str(UUID)
+        UUID = uuid4()  # https://docs.python.org/3/library/uuid.html
+        ULID = ULID()  # https://github.com/ulid/spec
+        SECURE_KEY = str(ULID) + ":" + str(UUID)  # Possibly a little psycho here
         with open(SECURE_KEY_FILE, "x") as f:
             f.write(SECURE_KEY)
         return SECURE_KEY
 
 
 def get_backup_path():
+    """Devulve la ruta para guardar los respaldos por defecto."""
     if Path.exists(BACKUP_PATH_FILE):
         with open(BACKUP_PATH_FILE) as f:
             return Path(f.readline())
