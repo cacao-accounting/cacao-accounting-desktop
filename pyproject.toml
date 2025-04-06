@@ -3,7 +3,7 @@ name = "cacao-accounting-desktop"
 description = "Cacao Accounting Desktop App."
 readme = "README.md"
 requires-python = ">=3.8"
-version="2025.04.06"
+version="2025.04.07"
 authors = [
   {name = "William Moreno Reyes"},
   {name = "BMO Soluciones", email = "development@bmogroup.solutions"},

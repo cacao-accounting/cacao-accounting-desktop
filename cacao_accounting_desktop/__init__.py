@@ -462,6 +462,17 @@ class App(customtkinter.CTk):
             self.toplevel_window.focus()
 
     def run_wsgi_server(self):
+        from loguru import logger
+        from cacao_accounting.database.helpers import verifica_coneccion_db
+
+        self.key = get_secret_key()
+        self.uri = self.create_sqlite_url()
+        self.cacao_app = create_app(
+            {
+                "SECRET_KEY": self.key,
+                "SQLALCHEMY_DATABASE_URI": self.uri,
+            }
+        )
         self.DB_FILE = Path(os.path.join(APP_DATA_DIR, self.select_db.get()))
         self.DB_BACKUP = Path(
             os.path.join(
@@ -469,16 +480,13 @@ class App(customtkinter.CTk):
                 str(datetime.today().strftime("%Y-%m-%d")) + "-cacao_accounting_backup-" + os.path.basename(self.DB_FILE),
             )
         )
+
         if not Path.exists(self.DB_BACKUP):
             copyfile(self.DB_FILE, self.DB_BACKUP)
         self.withdraw()
+
         self.app_server = FlaskUI(
-            app=create_app(
-                {
-                    "SECRET_KEY": get_secret_key(),
-                    "SQLALCHEMY_DATABASE_URI": self.create_sqlite_url(),
-                }
-            ),
+            app=self.cacao_app,
             server="flask",
             port=9871,
             fullscreen=False,
@@ -486,7 +494,15 @@ class App(customtkinter.CTk):
             height=600,
             width=1200,
         )
-        self.app_server.run()
+        with self.cacao_app.app_context():
+            if verifica_coneccion_db(app=self.cacao_app):
+                self.app_server.run()
+            else:
+                self.message = CTkMessagebox(
+                    title="Error",
+                    icon="cancel",
+                    message="Hubo un error al conectarse a la base de datos.",
+                )
 
     def new_database(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
