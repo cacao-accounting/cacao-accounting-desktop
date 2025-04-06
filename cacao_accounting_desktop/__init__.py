@@ -21,7 +21,6 @@ import os
 from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import TYPE_CHECKING
 
 # ---------------------------------------------------------------------------------------
 # Librerias de terceros
@@ -33,10 +32,6 @@ from customtkinter import filedialog
 from CTkMessagebox import CTkMessagebox
 from flaskwebgui import FlaskUI
 from PIL import Image
-
-
-if TYPE_CHECKING:
-    from flask import Flask
 
 
 # ---------------------------------------------------------------------------------------
@@ -154,7 +149,6 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         self.create.grid(row=8)
 
     def create_db(self):
-        from loguru import logger
 
         self.DATABASE_FILE = Path(os.path.join(APP_DATA_DIR, self.dbname.get()))
         self.DATABASE_URI = "sqlite:///" + str(self.DATABASE_FILE)
@@ -462,7 +456,6 @@ class App(customtkinter.CTk):
             self.toplevel_window.focus()
 
     def run_wsgi_server(self):
-        from loguru import logger
         from cacao_accounting.database.helpers import verifica_coneccion_db
 
         self.key = get_secret_key()
