@@ -154,6 +154,8 @@ class NewDabataseWin(customtkinter.CTkToplevel):
         self.create.grid(row=8)
 
     def create_db(self):
+        from loguru import logger
+
         self.DATABASE_FILE = Path(os.path.join(APP_DATA_DIR, self.dbname.get()))
         self.DATABASE_URI = "sqlite:///" + str(self.DATABASE_FILE)
 
@@ -189,20 +191,29 @@ class NewDabataseWin(customtkinter.CTkToplevel):
                 )
 
             else:
-                try:
-                    from cacao_accounting.database.helpers import inicia_base_de_datos
 
-                    inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd, with_examples=False)
-                    self.message = CTkMessagebox(
-                        title="Confirmación",
-                        icon="check",
-                        message="Base de datos creada correctamente.",
-                    )
-                except:
+                try:
+
+                    from cacao_accounting.database.helpers import inicia_base_de_datos
+                    from sqlalchemy.exc import OperationalError
+
+                    with self.app.app_context():
+                        inicia_base_de_datos(app=self.app, user=self.new_user, passwd=self.new_passwd, with_examples=False)
+                        db = True
+                except OperationalError:
+                    db = False
+
+                if not db:
                     self.message = CTkMessagebox(
                         title="Error",
                         icon="cancel",
                         message="Hubo un error al crear la base de datos.",
+                    )
+                else:
+                    self.message = CTkMessagebox(
+                        title="Confirmación",
+                        icon="check",
+                        message="Base de datos creada correctamente.",
                     )
 
         self.withdraw()
