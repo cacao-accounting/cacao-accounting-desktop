@@ -2,7 +2,7 @@
 name = "cacao-accounting-desktop"
 description = "Cacao Accounting Desktop App."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.13"
 version="2024.05.22"
 authors = [
   {name = "BMO Soluciones", email = "development@bmogroup.solutions"},
@@ -12,11 +12,7 @@ classifiers = [
   'Natural Language :: Spanish',
   'Operating System :: OS Independent',
   'Programming Language :: Python :: 3 :: Only',
-  'Programming Language :: Python :: 3.8',
-  'Programming Language :: Python :: 3.9',
-  'Programming Language :: Python :: 3.10',
-  'Programming Language :: Python :: 3.11',
-  'Programming Language :: Python :: 3.12',
+  'Programming Language :: Python :: 3.13',
   'Programming Language :: Python :: Implementation :: CPython'
 ]
 
@@ -29,14 +25,25 @@ cacao_accounting_desktop = "cacao_accounting_desktop:init_app"
 dependencies = {file = ["requirements.txt"]}
 
 [build-system]
-requires = ["setuptools", "wheel"]  # PEP 508 specifications.
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
-line-length = 127
+line-length = 120
+target-version = ["py313"]
 
 [tool.ruff]
-line-length = 127
+line-length = 120
+target-version = "py313"
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 15
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+pretty = true
 
 [tool.setuptools.packages]
 find = {namespaces = false}

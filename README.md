@@ -3,26 +3,48 @@
 # Cacao Accounting Desktop
 [![Python application](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml/badge.svg)](https://github.com/cacao-accounting/cacao-accounting-desktop/actions/workflows/python-app.yml)
 
-This is Cacao Accounting software packaged as a windows
-executable, so accountans can download the app and use it
-in theirs Windows personal computers to run small accounting
-projects, once installed you not require a active internet
-conection to run the app, but it is recomended to have a
-conection to the internet to make backups of the app database.
+This project packages Cacao Accounting as a desktop application for Windows.
+The current desktop wrapper uses PySide6 instead of TkInter and starts a local
+WSGI server with waitress in the background while the user interacts with the
+application from an embedded Qt WebEngine browser.
 
 Please note that if you are a Linux or Mac user you can host
 Cacao Accounting for your personal use with a few steps, this
 project is focused in Windows system that do not have a default
 install of Python.
 
+## Current desktop architecture
+
+The desktop application now separates business rules from the UI:
+
+1. A pure core layer manages configuration, SQLite directories, URI generation,
+    backup and restore operations.
+2. A PySide6 main window lets the user select the SQLite directory, refresh the
+    database list, create new databases, restore backups and open the web app.
+3. A waitress server is started in the background and stopped cleanly when the
+    desktop window closes.
+
+## Run locally
+
+Install dependencies and start the desktop wrapper:
+
+```bash
+python -m pip install -r requirements.txt
+python cacaoaccounting.pyw
+```
+
+Useful validation commands:
+
+```bash
+python -m build
+pytest
+```
+
 ## Cacao Accounting as stand alone executable for Windows.
 
-Please note that this is not a native windows app, this mean a
-app compiled to run as windows executable, [Cacao Accounting](https://github.com/cacao-accounting/cacao-accounting)
-is a python wsgi app based is the [Flask Python Microframework](https://flask.palletsprojects.com/en/3.0.x/), but we use a simple hack thanks
-to the [Flask Web Gui](https://github.com/ClimenteA/flaskwebgui) project to start a local wsgi server and
-open a browers windows so the user can interact with the app, this way we can simulate a local install of
-the app so accountans can use the app localy with out knowing how to set up a server.
+Please note that this is not a native Windows application. The desktop wrapper
+ships Python plus the dependencies required to run the Flask-based web app as a
+local desktop experience, now with a native Qt shell and an embedded browser.
 
 Note than been usable as standalone Windows app is one of the main reason beging the development of the Cacao
 Accounting project.
