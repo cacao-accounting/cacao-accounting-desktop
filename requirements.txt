@@ -1,5 +1,5 @@
 appdirs
-cacao-accounting==0.0.1.dev20260703
+cacao-accounting==0.0.1.dev20260711
 pillow
 PySide6
 waitress
