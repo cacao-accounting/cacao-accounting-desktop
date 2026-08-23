@@ -4,7 +4,7 @@ import os
 import inspect
 from importlib import import_module
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from shutil import copyfile
 from uuid import uuid4
@@ -217,7 +217,7 @@ def create_backup(
     )
     effective_backup_directory.mkdir(parents=True, exist_ok=True)
 
-    snapshot_time = timestamp or datetime.now()
+    snapshot_time = timestamp or datetime.now(timezone.utc).astimezone()
     backup_name = f"{snapshot_time:%Y-%m-%d}-cacao_accounting_backup-{database_path.name}"
     backup_path = effective_backup_directory / backup_name
 
