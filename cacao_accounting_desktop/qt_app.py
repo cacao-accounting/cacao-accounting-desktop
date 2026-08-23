@@ -5,7 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QProcess, QThread, Qt, QTimer, QUrl, Signal, Slot
+from PySide6.QtCore import QObject, QProcess, QThread, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QCloseEvent, QIcon, QPixmap
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWebEngineWidgets import QWebEngineView
@@ -98,7 +98,6 @@ class BrowserWindow(QMainWindow):
         self.web_view.setPage(BrowserPage(self.web_view))
         self.web_view.page().printRequested.connect(self._print_current_page)
         self.web_view.page().pdfPrintingFinished.connect(self._pdf_printing_finished)
-        self.web_view.urlChanged.connect(self._maybe_print_preview)
         self.setCentralWidget(self.web_view)
 
     def open_url(self, url: str) -> None:
@@ -106,13 +105,6 @@ class BrowserWindow(QMainWindow):
         self.show()
         self.raise_()
         self.activateWindow()
-
-    @Slot(QUrl)
-    def _maybe_print_preview(self, url: QUrl) -> None:
-        """The desktop print shortcut opens a preview, then requests printing."""
-        if "/print/" not in url.path() or not url.path().endswith("/preview"):
-            return
-        QTimer.singleShot(350, lambda: self.web_view.page().runJavaScript("window.print();"))
 
     @Slot()
     def _print_current_page(self) -> None:
