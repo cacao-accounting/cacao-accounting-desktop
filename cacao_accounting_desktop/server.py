@@ -52,6 +52,7 @@ class WaitressServerController:
                 {
                     "SECRET_KEY": secret_key,
                     "SQLALCHEMY_DATABASE_URI": database_uri,
+                    "MODO_ESCRITORIO": True,
                 }
             )
             server = server_factory(app)

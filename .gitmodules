@@ -1,0 +1,3 @@
+[submodule "upstream/cacao-accounting"]
+	path = upstream/cacao-accounting
+	url = https://github.com/cacao-accounting/cacao-accounting

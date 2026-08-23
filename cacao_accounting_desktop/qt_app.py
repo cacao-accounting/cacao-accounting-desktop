@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import os
 import sys
+import tempfile
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QThread, Qt, QUrl, Signal, Slot
+from PySide6.QtCore import QObject, QProcess, QThread, Qt, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QCloseEvent, QIcon, QPixmap
+from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
     QApplication,
@@ -77,6 +80,13 @@ class CreateDatabaseWorker(QObject):
         self.finished.emit(created_path.name)
 
 
+class BrowserPage(QWebEnginePage):
+    """Keep web links opened with target=_blank inside the desktop window."""
+
+    def createWindow(self, _window_type):  # noqa: N802 - Qt override
+        return self
+
+
 class BrowserWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -85,6 +95,10 @@ class BrowserWindow(QMainWindow):
         self.setWindowIcon(_load_icon("icon.ico"))
 
         self.web_view = QWebEngineView(self)
+        self.web_view.setPage(BrowserPage(self.web_view))
+        self.web_view.page().printRequested.connect(self._print_current_page)
+        self.web_view.page().pdfPrintingFinished.connect(self._pdf_printing_finished)
+        self.web_view.urlChanged.connect(self._maybe_print_preview)
         self.setCentralWidget(self.web_view)
 
     def open_url(self, url: str) -> None:
@@ -92,6 +106,33 @@ class BrowserWindow(QMainWindow):
         self.show()
         self.raise_()
         self.activateWindow()
+
+    @Slot(QUrl)
+    def _maybe_print_preview(self, url: QUrl) -> None:
+        """The desktop print shortcut opens a preview, then requests printing."""
+        if "/print/" not in url.path() or not url.path().endswith("/preview"):
+            return
+        QTimer.singleShot(350, lambda: self.web_view.page().runJavaScript("window.print();"))
+
+    @Slot()
+    def _print_current_page(self) -> None:
+        """Render the current WebView page to PDF and send it to the OS printer."""
+        pdf_path = Path(tempfile.gettempdir()) / "cacao-accounting-print.pdf"
+        self.web_view.page().printToPdf(str(pdf_path))
+
+    @Slot(str, bool)
+    def _pdf_printing_finished(self, file_path: str, success: bool) -> None:
+        if not success:
+            QMessageBox.critical(self, "Impresión", "No fue posible generar el PDF del comprobante.")
+            return
+
+        try:
+            if sys.platform.startswith("win"):
+                os.startfile(file_path, "print")  # type: ignore[attr-defined]
+            else:
+                QProcess.startDetached("lp", [file_path])
+        except (OSError, RuntimeError) as error:
+            QMessageBox.critical(self, "Impresión", f"No fue posible enviar el comprobante a la impresora: {error}")
 
 
 class CreateDatabaseDialog(QDialog):

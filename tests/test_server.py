@@ -61,6 +61,7 @@ def test_waitress_server_controller_starts_and_stops() -> None:
     assert url == config.base_url
     assert controller.is_running
     assert captured["settings"]["SQLALCHEMY_DATABASE_URI"] == "sqlite:///tmp/demo.db"
+    assert captured["settings"]["MODO_ESCRITORIO"] is True
 
     controller.stop()
 
