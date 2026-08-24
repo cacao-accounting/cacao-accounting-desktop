@@ -40,6 +40,22 @@ python -m build
 pytest
 ```
 
+## Native printing
+
+The print button rendered by Cacao Accounting uses `window.print()`. The
+desktop shell handles that request with Qt Print Support, opens the operating
+system print dialog, and sends the rendered WebEngine page directly to the
+selected printer. It does not create or open an intermediate PDF file.
+
+Windows bundles must include the PySide6 PrintSupport and WebEngine modules.
+For confined Linux packages, grant access to the system print service:
+
+- Snap applications must plug the non-administrative `cups` interface.
+- Flatpak manifests must include `--socket=cups` in `finish-args`.
+
+The printer must already be configured in Windows or CUPS. Printer
+administration is intentionally outside the desktop application's scope.
+
 ## Cacao Accounting as stand alone executable for Windows.
 
 Please note that this is not a native Windows application. The desktop wrapper

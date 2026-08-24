@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import os
 import sys
-import tempfile
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QProcess, QThread, Qt, QUrl, Signal, Slot
+from PySide6.QtCore import QObject, QThread, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QCloseEvent, QIcon, QPixmap
+from PySide6.QtPrintSupport import QPrintDialog, QPrinter, QPrinterInfo
 from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
@@ -49,6 +48,14 @@ from .server import WaitressServerController
 
 APP_DIRECTORY = Path(__file__).resolve().parent
 ASSETS_DIRECTORY = APP_DIRECTORY / "assets"
+
+
+def _url_origin(url: QUrl) -> tuple[str, str, int]:
+    scheme = url.scheme().lower()
+    port = url.port()
+    if port < 0:
+        port = {"http": 80, "https": 443}.get(scheme, -1)
+    return scheme, url.host().lower(), port
 
 
 class CreateDatabaseWorker(QObject):
@@ -97,34 +104,61 @@ class BrowserWindow(QMainWindow):
         self.web_view = QWebEngineView(self)
         self.web_view.setPage(BrowserPage(self.web_view))
         self.web_view.page().printRequested.connect(self._print_current_page)
-        self.web_view.page().pdfPrintingFinished.connect(self._pdf_printing_finished)
+        self.web_view.printFinished.connect(self._print_finished)
+        self._trusted_origin: tuple[str, str, int] | None = None
+        self._active_printer: QPrinter | None = None
+        self._printing_in_progress = False
         self.setCentralWidget(self.web_view)
 
     def open_url(self, url: str) -> None:
-        self.web_view.setUrl(QUrl(url))
+        target_url = QUrl(url)
+        self._trusted_origin = _url_origin(target_url)
+        self.web_view.setUrl(target_url)
         self.show()
         self.raise_()
         self.activateWindow()
 
     @Slot()
     def _print_current_page(self) -> None:
-        """Render the current WebView page to PDF and send it to the OS printer."""
-        pdf_path = Path(tempfile.gettempdir()) / "cacao-accounting-print.pdf"
-        self.web_view.page().printToPdf(str(pdf_path))
-
-    @Slot(str, bool)
-    def _pdf_printing_finished(self, file_path: str, success: bool) -> None:
-        if not success:
-            QMessageBox.critical(self, "Impresión", "No fue posible generar el PDF del comprobante.")
+        """Open the system print dialog and print the current web page."""
+        if self._printing_in_progress:
             return
 
+        if self._trusted_origin is None or _url_origin(self.web_view.url()) != self._trusted_origin:
+            QMessageBox.warning(self, "Impresión", "Solo se puede imprimir contenido servido por Cacao Accounting.")
+            return
+
+        if not QPrinterInfo.availablePrinters():
+            QMessageBox.warning(self, "Impresión", "No hay impresoras configuradas en el sistema.")
+            return
+
+        printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+        printer.setOutputFormat(QPrinter.OutputFormat.NativeFormat)
+        printer.setDocName(self.web_view.title().strip() or "Cacao Accounting")
+        if not printer.isValid():
+            QMessageBox.critical(self, "Impresión", "No fue posible inicializar la impresora seleccionada.")
+            return
+
+        dialog = QPrintDialog(printer, self)
+        dialog.setWindowTitle("Imprimir comprobante")
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        self._active_printer = printer
+        self._printing_in_progress = True
         try:
-            if sys.platform.startswith("win"):
-                os.startfile(file_path, "print")  # type: ignore[attr-defined]
-            else:
-                QProcess.startDetached("lp", [file_path])
-        except (OSError, RuntimeError) as error:
-            QMessageBox.critical(self, "Impresión", f"No fue posible enviar el comprobante a la impresora: {error}")
+            self.web_view.print(printer)
+        except RuntimeError as error:
+            self._active_printer = None
+            self._printing_in_progress = False
+            QMessageBox.critical(self, "Impresión", f"No fue posible iniciar la impresión: {error}")
+
+    @Slot(bool)
+    def _print_finished(self, success: bool) -> None:
+        self._active_printer = None
+        self._printing_in_progress = False
+        if not success:
+            QMessageBox.critical(self, "Impresión", "No fue posible enviar el comprobante a la impresora.")
 
 
 class CreateDatabaseDialog(QDialog):
