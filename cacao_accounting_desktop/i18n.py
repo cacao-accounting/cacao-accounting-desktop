@@ -164,5 +164,5 @@ def localize_error(language: str, message: str) -> str:
     }
     for source, target in prefixes.items():
         if message.startswith(source):
-            return target + message[len(source) :]
+            return target + message[len(source):]
     return message
