@@ -18,6 +18,25 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install Qt runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2t64 \
+            libdrm2 \
+            libegl1 \
+            libgbm1 \
+            libgl1 \
+            libglvnd0 \
+            libglx0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxkbcommon0 \
+            libxkbfile1 \
+            libxrandr2 \
+            libxtst6 \
+            libxcb-dri3-0
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
