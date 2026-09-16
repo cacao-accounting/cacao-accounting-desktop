@@ -38,12 +38,15 @@ from .core import (
     ensure_directories,
     get_backup_directory,
     get_database_directory,
+    get_language,
     get_secret_key,
     list_database_files,
     restore_database,
+    set_language,
     set_backup_directory,
     set_database_directory,
 )
+from .i18n import localize_error, text
 from .server import WaitressServerController
 
 APP_DIRECTORY = Path(__file__).resolve().parent
@@ -62,11 +65,12 @@ class CreateDatabaseWorker(QObject):
     finished = Signal(str)
     failed = Signal(str)
 
-    def __init__(self, file_name: str, admin_user: str, admin_password: str):
+    def __init__(self, file_name: str, admin_user: str, admin_password: str, language: str = "es"):
         super().__init__()
         self.file_name = file_name
         self.admin_user = admin_user
         self.admin_password = admin_password
+        self.language = language
 
     @Slot()
     def run(self) -> None:
@@ -81,7 +85,7 @@ class CreateDatabaseWorker(QObject):
             self.failed.emit(str(error))
             return
         except Exception as error:
-            self.failed.emit(f"No fue posible crear la base de datos: {error}")
+            self.failed.emit(text(self.language, "database_creation_error", error=error))
             return
 
         self.finished.emit(created_path.name)
@@ -95,8 +99,9 @@ class BrowserPage(QWebEnginePage):
 
 
 class BrowserWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, language: str = "es"):
         super().__init__()
+        self.language = language
         self.setWindowTitle("Cacao Accounting")
         self.resize(1200, 800)
         self.setWindowIcon(_load_icon("icon.ico"))
@@ -125,22 +130,22 @@ class BrowserWindow(QMainWindow):
             return
 
         if self._trusted_origin is None or _url_origin(self.web_view.url()) != self._trusted_origin:
-            QMessageBox.warning(self, "Impresión", "Solo se puede imprimir contenido servido por Cacao Accounting.")
+            QMessageBox.warning(self, self._text("print"), self._text("print_external_page"))
             return
 
         if not QPrinterInfo.availablePrinters():
-            QMessageBox.warning(self, "Impresión", "No hay impresoras configuradas en el sistema.")
+            QMessageBox.warning(self, self._text("print"), self._text("no_printers"))
             return
 
         printer = QPrinter(QPrinter.PrinterMode.HighResolution)
         printer.setOutputFormat(QPrinter.OutputFormat.NativeFormat)
         printer.setDocName(self.web_view.title().strip() or "Cacao Accounting")
         if not printer.isValid():
-            QMessageBox.critical(self, "Impresión", "No fue posible inicializar la impresora seleccionada.")
+            QMessageBox.critical(self, self._text("print"), self._text("printer_init_error"))
             return
 
         dialog = QPrintDialog(printer, self)
-        dialog.setWindowTitle("Imprimir comprobante")
+        dialog.setWindowTitle(self._text("print_title"))
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
@@ -151,41 +156,47 @@ class BrowserWindow(QMainWindow):
         except RuntimeError as error:
             self._active_printer = None
             self._printing_in_progress = False
-            QMessageBox.critical(self, "Impresión", f"No fue posible iniciar la impresión: {error}")
+            QMessageBox.critical(self, self._text("print"), self._text("print_start_error", error=error))
 
     @Slot(bool)
     def _print_finished(self, success: bool) -> None:
         self._active_printer = None
         self._printing_in_progress = False
         if not success:
-            QMessageBox.critical(self, "Impresión", "No fue posible enviar el comprobante a la impresora.")
+            QMessageBox.critical(self, self._text("print"), self._text("print_error"))
+
+    def _text(self, key: str, **values: object) -> str:
+        return text(self.language, key, **values)
 
 
 class CreateDatabaseDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, language: str = "es"):
         super().__init__(parent)
-        self.setWindowTitle("Crear nueva base de datos")
+        self.language = language
+        self.setWindowTitle(self._text("create_database_title"))
         self.setModal(True)
 
         self.database_name = QLineEdit(self)
         self.database_name.setPlaceholderText("empresa.db")
 
         self.admin_user = QLineEdit(self)
-        self.admin_user.setPlaceholderText("Administrador")
+        self.admin_user.setPlaceholderText(self._text("administrator"))
 
         self.admin_password = QLineEdit(self)
         self.admin_password.setEchoMode(QLineEdit.EchoMode.Password)
-        self.admin_password.setPlaceholderText("Clave de acceso")
+        self.admin_password.setPlaceholderText(self._text("access_key"))
 
         form_layout = QFormLayout()
-        form_layout.addRow("Base de datos", self.database_name)
-        form_layout.addRow("Usuario administrador", self.admin_user)
-        form_layout.addRow("Clave", self.admin_password)
+        form_layout.addRow(self._text("database"), self.database_name)
+        form_layout.addRow(self._text("administrator_user"), self.admin_user)
+        form_layout.addRow(self._text("key"), self.admin_password)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
             parent=self,
         )
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText(self._text("accept"))
+        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText(self._text("cancel"))
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
@@ -193,19 +204,55 @@ class CreateDatabaseDialog(QDialog):
         root_layout.addLayout(form_layout)
         root_layout.addWidget(buttons)
 
+    def _text(self, key: str, **values: object) -> str:
+        return text(self.language, key, **values)
+
+
+class LanguageSelectionDialog(QDialog):
+    """Ask for the wrapper language before the main window is created."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(text("es", "language_dialog_title") + " / " + text("en", "language_dialog_title"))
+        self.setModal(True)
+
+        language_label = QLabel(
+            text("es", "language_dialog_label") + "\n" + text("en", "language_dialog_label"),
+            self,
+        )
+        self.language_combo = QComboBox(self)
+        self.language_combo.addItem("Español", "es")
+        self.language_combo.addItem("English", "en")
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok, parent=self)
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText(
+            text("es", "continue") + " / " + text("en", "continue")
+        )
+        buttons.accepted.connect(self.accept)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(language_label)
+        layout.addWidget(self.language_combo)
+        layout.addWidget(buttons)
+
+    @property
+    def language(self) -> str:
+        return str(self.language_combo.currentData())
+
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, language: str = "es"):
         super().__init__()
+        self.language = language
         ensure_directories(DEFAULT_PATHS)
 
         self.server_controller = WaitressServerController()
-        self.browser_window = BrowserWindow()
+        self.browser_window = BrowserWindow(language)
         self.current_database_uri = ""
         self.create_database_thread: QThread | None = None
         self.create_database_worker: CreateDatabaseWorker | None = None
 
-        self.setWindowTitle("Cacao Accounting Desktop")
+        self.setWindowTitle(self._text("desktop_title"))
         self.setMinimumSize(900, 620)
         self.setWindowIcon(_load_icon("icon.ico"))
         self.setStyleSheet("""
@@ -287,9 +334,12 @@ class MainWindow(QMainWindow):
 
         self.refresh_database_list()
         self._show_message(
-            "Selecciona una base de datos existente o crea una nueva desde esta ventana.",
+            self._text("initial_message"),
             error=False,
         )
+
+    def _text(self, key: str, **values: object) -> str:
+        return text(self.language, key, **values)
 
     def _build_header(self) -> QWidget:
         container = QWidget(self)
@@ -309,7 +359,7 @@ class MainWindow(QMainWindow):
         return container
 
     def _build_paths_group(self) -> QGroupBox:
-        group = QGroupBox("Directorios", self)
+        group = QGroupBox(self._text("directories"), self)
         layout = QGridLayout(group)
         layout.setHorizontalSpacing(16)
         layout.setVerticalSpacing(14)
@@ -317,28 +367,28 @@ class MainWindow(QMainWindow):
         self.database_directory_value = QLabel(group)
         self.database_directory_value.setObjectName("directoryValue")
         self.database_directory_value.setWordWrap(True)
-        self.database_directory_caption = QLabel("Bases SQLite", group)
+        self.database_directory_caption = QLabel(self._text("sqlite_databases"), group)
         self.database_directory_caption.setObjectName("directoryCaption")
-        select_database_directory_button = QPushButton("Seleccionar carpeta de bases", group)
+        select_database_directory_button = QPushButton(self._text("select_database_folder"), group)
         select_database_directory_button.clicked.connect(self.choose_database_directory)
 
         self.backup_directory_value = QLabel(group)
         self.backup_directory_value.setObjectName("directoryValue")
         self.backup_directory_value.setWordWrap(True)
-        self.backup_directory_caption = QLabel("Respaldos", group)
+        self.backup_directory_caption = QLabel(self._text("backups"), group)
         self.backup_directory_caption.setObjectName("directoryCaption")
-        select_backup_directory_button = QPushButton("Configurar carpeta de respaldo", group)
+        select_backup_directory_button = QPushButton(self._text("configure_backup_folder"), group)
         select_backup_directory_button.clicked.connect(self.choose_backup_directory)
 
         database_info = self._build_directory_summary(
             self.database_directory_caption,
             self.database_directory_value,
-            "Carpeta donde se listan y crean las bases SQLite.",
+            self._text("database_folder_help"),
         )
         backup_info = self._build_directory_summary(
             self.backup_directory_caption,
             self.backup_directory_value,
-            "Carpeta usada para respaldos y restauraciones.",
+            self._text("backup_folder_help"),
         )
 
         layout.addWidget(database_info, 0, 0, 1, 2)
@@ -363,34 +413,34 @@ class MainWindow(QMainWindow):
         return container
 
     def _build_database_group(self) -> QGroupBox:
-        group = QGroupBox("Bases de datos", self)
+        group = QGroupBox(self._text("databases"), self)
         layout = QGridLayout(group)
 
         self.database_combo = QComboBox(group)
         self.database_combo.currentIndexChanged.connect(self.update_database_uri)
 
-        refresh_button = QPushButton("Refrescar lista", group)
+        refresh_button = QPushButton(self._text("refresh_list"), group)
         refresh_button.clicked.connect(self.refresh_database_list)
 
-        layout.addWidget(QLabel("Base activa"), 0, 0)
+        layout.addWidget(QLabel(self._text("active_database")), 0, 0)
         layout.addWidget(self.database_combo, 0, 1)
         layout.addWidget(refresh_button, 0, 2)
         return group
 
     def _build_actions_group(self) -> QGroupBox:
-        group = QGroupBox("Acciones", self)
+        group = QGroupBox(self._text("actions"), self)
         layout = QGridLayout(group)
 
-        self.create_button = QPushButton("Crear nueva base", group)
+        self.create_button = QPushButton(self._text("create_database"), group)
         self.create_button.clicked.connect(self.open_create_database_dialog)
 
-        restore_button = QPushButton("Restaurar base", group)
+        restore_button = QPushButton(self._text("restore_database"), group)
         restore_button.clicked.connect(self.restore_database_from_file)
 
-        self.backup_button = QPushButton("Respaldar base seleccionada", group)
+        self.backup_button = QPushButton(self._text("backup_selected"), group)
         self.backup_button.clicked.connect(self.backup_selected_database)
 
-        self.start_button = QPushButton("Iniciar Cacao Accounting", group)
+        self.start_button = QPushButton(self._text("start_accounting"), group)
         self.start_button.clicked.connect(self.start_accounting)
 
         layout.addWidget(self.create_button, 0, 0)
@@ -414,7 +464,7 @@ class MainWindow(QMainWindow):
             self.database_combo.setCurrentIndex(index if index >= 0 else 0)
             self.database_combo.setEnabled(True)
         else:
-            self.database_combo.addItem("No se encontraron bases de datos")
+            self.database_combo.addItem(self._text("no_databases"))
             self.database_combo.setEnabled(False)
         self.database_combo.blockSignals(False)
 
@@ -434,7 +484,7 @@ class MainWindow(QMainWindow):
         current_directory = str(get_database_directory(DEFAULT_PATHS))
         selected_directory = QFileDialog.getExistingDirectory(
             self,
-            "Seleccione el directorio para almacenar bases SQLite",
+            self._text("select_database_folder_dialog"),
             current_directory,
         )
         if not selected_directory:
@@ -447,13 +497,13 @@ class MainWindow(QMainWindow):
             return
 
         self.refresh_database_list()
-        self._show_message("Directorio de bases de datos actualizado.", error=False)
+        self._show_message(self._text("database_folder_updated"), error=False)
 
     def choose_backup_directory(self) -> None:
         current_directory = str(get_backup_directory(DEFAULT_PATHS))
         selected_directory = QFileDialog.getExistingDirectory(
             self,
-            "Seleccione el directorio para respaldos",
+            self._text("select_backup_folder_dialog"),
             current_directory,
         )
         if not selected_directory:
@@ -466,14 +516,14 @@ class MainWindow(QMainWindow):
             return
 
         self._set_directory_summary(self.backup_directory_value, get_backup_directory(DEFAULT_PATHS))
-        self._show_message("Directorio de respaldos actualizado.", error=False)
+        self._show_message(self._text("backup_folder_updated"), error=False)
 
     def open_create_database_dialog(self) -> None:
         if self.create_database_thread is not None and self.create_database_thread.isRunning():
-            self._show_message("Ya hay una creación de base en curso.", error=True)
+            self._show_message(self._text("creation_in_progress"), error=True)
             return
 
-        dialog = CreateDatabaseDialog(self)
+        dialog = CreateDatabaseDialog(self, self.language)
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
@@ -485,10 +535,10 @@ class MainWindow(QMainWindow):
 
     def _start_create_database(self, file_name: str, admin_user: str, admin_password: str) -> None:
         self._set_database_creation_busy(True)
-        self._show_message("Creando base de datos, por favor espera...", error=False)
+        self._show_message(self._text("creating_database"), error=False)
 
         self.create_database_thread = QThread(self)
-        self.create_database_worker = CreateDatabaseWorker(file_name, admin_user, admin_password)
+        self.create_database_worker = CreateDatabaseWorker(file_name, admin_user, admin_password, self.language)
         self.create_database_worker.moveToThread(self.create_database_thread)
 
         self.create_database_thread.started.connect(self.create_database_worker.run)
@@ -507,9 +557,9 @@ class MainWindow(QMainWindow):
     def _on_create_database_success(self, database_name: str) -> None:
         self.refresh_database_list()
         self.database_combo.setCurrentText(database_name)
-        success_message = f"Base de datos creada correctamente: {database_name}"
+        success_message = self._text("database_created", database_name=database_name)
         self._show_message(success_message, error=False)
-        QMessageBox.information(self, "Cacao Accounting Desktop", success_message)
+        QMessageBox.information(self, self._text("desktop_title"), success_message)
 
     def _on_create_database_error(self, message: str) -> None:
         self._show_message(message, error=True)
@@ -527,9 +577,9 @@ class MainWindow(QMainWindow):
     def restore_database_from_file(self) -> None:
         source_path, _ = QFileDialog.getOpenFileName(
             self,
-            "Seleccione la base de datos a restaurar",
+            self._text("select_database_file"),
             str(get_backup_directory(DEFAULT_PATHS)),
-            "SQLite (*.db);;Todos los archivos (*)",
+            self._text("sqlite_files"),
         )
         if not source_path:
             return
@@ -537,8 +587,8 @@ class MainWindow(QMainWindow):
         suggested_name = Path(source_path).name
         target_name, accepted = QInputDialog.getText(
             self,
-            "Nombre de la base restaurada",
-            "Nombre del archivo .db",
+            self._text("restored_database_name"),
+            self._text("database_file_name"),
             text=suggested_name,
         )
         if not accepted:
@@ -552,12 +602,12 @@ class MainWindow(QMainWindow):
 
         self.refresh_database_list()
         self.database_combo.setCurrentText(restored_path.name)
-        self._show_message("Base de datos restaurada correctamente.", error=False)
+        self._show_message(self._text("database_restored"), error=False)
 
     def backup_selected_database(self) -> None:
         selected_name = self._selected_database_name()
         if not selected_name:
-            self._show_message("Selecciona primero una base de datos.", error=True)
+            self._show_message(self._text("select_database_first"), error=True)
             return
 
         try:
@@ -566,12 +616,12 @@ class MainWindow(QMainWindow):
             self._show_message(str(error), error=True)
             return
 
-        self._show_message(f"Respaldo generado en: {backup_path}", error=False)
+        self._show_message(self._text("backup_created", backup_path=backup_path), error=False)
 
     def start_accounting(self) -> None:
         selected_name = self._selected_database_name()
         if not selected_name:
-            self._show_message("Selecciona una base de datos antes de iniciar la aplicacion.", error=True)
+            self._show_message(self._text("select_database_to_start"), error=True)
             return
 
         try:
@@ -579,18 +629,22 @@ class MainWindow(QMainWindow):
             create_backup(selected_name, paths=DEFAULT_PATHS)
             if self.current_database_uri and self.current_database_uri != database_uri:
                 self.server_controller.stop()
-            address = self.server_controller.start(database_uri=database_uri, secret_key=get_secret_key(DEFAULT_PATHS))
+            address = self.server_controller.start(
+                database_uri=database_uri,
+                secret_key=get_secret_key(DEFAULT_PATHS),
+                language=self.language,
+            )
         except DesktopError as error:
             self._show_message(str(error), error=True)
             return
         except Exception as error:
-            self._show_message(f"No fue posible iniciar el servidor: {error}", error=True)
+            self._show_message(self._text("server_start_error", error=error), error=True)
             return
 
         self.current_database_uri = database_uri
         self.browser_window.open_url(address)
         self.hide()
-        self._show_message("Servidor local iniciado correctamente.", error=False)
+        self._show_message(self._text("server_started"), error=False)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.server_controller.stop()
@@ -604,11 +658,12 @@ class MainWindow(QMainWindow):
         return current_text or None
 
     def _show_message(self, message: str, error: bool) -> None:
+        message = localize_error(self.language, message)
         self.status_label.setText(message)
         if not error:
             return
 
-        QMessageBox.critical(self, "Cacao Accounting Desktop", message)
+        QMessageBox.critical(self, self._text("desktop_title"), message)
 
     def _set_directory_summary(self, label: QLabel, path: Path) -> None:
         folder_name = path.name or str(path)
@@ -631,6 +686,13 @@ def _load_pixmap(file_name: str, width: int) -> QPixmap:
 
 def init_app() -> int:
     app = QApplication.instance() or QApplication(sys.argv)
-    window = MainWindow()
+    language = get_language(DEFAULT_PATHS)
+    if language is None:
+        language_dialog = LanguageSelectionDialog()
+        if language_dialog.exec() != QDialog.DialogCode.Accepted:
+            return 0
+        language = set_language(language_dialog.language, DEFAULT_PATHS)
+
+    window = MainWindow(language)
     window.show()
     return app.exec()

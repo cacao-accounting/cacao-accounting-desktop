@@ -13,9 +13,12 @@ from cacao_accounting_desktop.core import (
     create_backup,
     create_database,
     ensure_directories,
+    get_language,
     get_database_directory,
+    language_file,
     list_database_files,
     restore_database,
+    set_language,
     set_database_directory,
 )
 
@@ -43,6 +46,23 @@ def test_database_directory_can_be_overridden(tmp_path: Path) -> None:
 
     assert get_database_directory(paths) == custom_directory.resolve()
     assert custom_directory.exists()
+
+
+def test_language_is_persisted_as_plain_text(tmp_path: Path) -> None:
+    paths = make_paths(tmp_path)
+
+    assert get_language(paths) is None
+    assert set_language("EN", paths) == "en"
+    assert get_language(paths) == "en"
+    assert language_file(paths).read_text(encoding="utf-8") == "en\n"
+
+
+def test_invalid_persisted_language_requires_selection(tmp_path: Path) -> None:
+    paths = make_paths(tmp_path)
+    paths.config_dir.mkdir(parents=True)
+    language_file(paths).write_text("fr\n", encoding="utf-8")
+
+    assert get_language(paths) is None
 
 
 def test_list_database_files_reads_selected_directory(tmp_path: Path) -> None:

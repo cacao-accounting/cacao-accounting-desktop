@@ -13,6 +13,16 @@ from appdirs import AppDirs
 
 APP_DIRS = AppDirs("Cacao Accounting Desktop", "BMO Soluciones")
 APP_HOME_DIR = Path(os.path.expanduser("~/Cacao Accounting"))
+SUPPORTED_LANGUAGES = ("es", "en")
+LANGUAGE_FILE_NAME = "language.txt"
+
+
+def _app_config_directory() -> Path:
+    """Return the application directory inside APPDATA when available."""
+    appdata_directory = os.environ.get("APPDATA")
+    if appdata_directory:
+        return Path(appdata_directory) / "BMO Soluciones" / "Cacao Accounting Desktop"
+    return Path(APP_DIRS.user_config_dir)
 
 
 @dataclass(frozen=True)
@@ -23,6 +33,7 @@ class DesktopPaths:
     secret_key_file: Path
     backup_path_file: Path
     database_path_file: Path
+    language_dir: Path | None = None
 
 
 DEFAULT_PATHS = DesktopPaths(
@@ -32,6 +43,7 @@ DEFAULT_PATHS = DesktopPaths(
     secret_key_file=Path(APP_DIRS.user_config_dir) / "secret.key",
     backup_path_file=Path(APP_DIRS.user_config_dir) / "backup.path",
     database_path_file=Path(APP_DIRS.user_config_dir) / "database.path",
+    language_dir=_app_config_directory(),
 )
 
 
@@ -45,6 +57,33 @@ class ValidationError(DesktopError):
 
 class ExternalDependencyError(DesktopError):
     """Raised when runtime dependencies are missing."""
+
+
+def language_file(paths: DesktopPaths = DEFAULT_PATHS) -> Path:
+    """Return the plain-text file used to persist the desktop language."""
+    return (paths.language_dir or paths.config_dir) / LANGUAGE_FILE_NAME
+
+
+def get_language(paths: DesktopPaths = DEFAULT_PATHS) -> str | None:
+    """Read the persisted language, returning None on first run or invalid data."""
+    config_file = language_file(paths)
+    if not config_file.exists():
+        return None
+
+    value = config_file.read_text(encoding="utf-8-sig").strip().lower()
+    return value if value in SUPPORTED_LANGUAGES else None
+
+
+def set_language(language: str, paths: DesktopPaths = DEFAULT_PATHS) -> str:
+    """Persist a supported desktop language in APPDATA."""
+    normalized_language = str(language).strip().lower()
+    if normalized_language not in SUPPORTED_LANGUAGES:
+        raise ValidationError("El idioma seleccionado no está disponible.")
+
+    language_path = language_file(paths)
+    language_path.parent.mkdir(parents=True, exist_ok=True)
+    language_path.write_text(f"{normalized_language}\n", encoding="utf-8")
+    return normalized_language
 
 
 def ensure_directories(paths: DesktopPaths = DEFAULT_PATHS) -> None:

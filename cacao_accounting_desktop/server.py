@@ -7,7 +7,29 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import Protocol
 
-from .core import ExternalDependencyError
+from .core import ExternalDependencyError, SUPPORTED_LANGUAGES
+
+
+def _set_application_language(app, language: str) -> None:
+    """Persist the desktop choice in the selected Cacao Accounting database."""
+    if language not in SUPPORTED_LANGUAGES:
+        raise ValueError(f"Idioma no soportado: {language}")
+
+    try:
+        from cacao_accounting.database import database
+        from cacao_accounting.setup.service import SETUP_LANGUAGE, set_setup_value
+    except ImportError as error:
+        raise ExternalDependencyError(
+            "La versión instalada de cacao-accounting no permite configurar el idioma."
+        ) from error
+
+    with app.app_context():
+        try:
+            set_setup_value(SETUP_LANGUAGE, language)
+            database.session.commit()
+        except Exception:
+            database.session.rollback()
+            raise
 
 
 class ServerLike(Protocol):
@@ -41,7 +63,7 @@ class WaitressServerController:
     def is_running(self) -> bool:
         return self._thread is not None and self._thread.is_alive()
 
-    def start(self, database_uri: str, secret_key: str) -> str:
+    def start(self, database_uri: str, secret_key: str, language: str | None = None) -> str:
         with self._lock:
             if self.is_running:
                 return self.config.base_url
@@ -55,6 +77,8 @@ class WaitressServerController:
                     "MODO_ESCRITORIO": True,
                 }
             )
+            if language:
+                _set_application_language(app, language)
             server = server_factory(app)
             self._server = server
             self._thread = threading.Thread(target=server.run, name="cacao-accounting-wsgi", daemon=True)
